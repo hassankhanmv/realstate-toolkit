@@ -1,7 +1,117 @@
 {
-  "welcome": "مرحبا بك في مجموعة أدوات العقارات",
+  "app_name": "عقارات الإمارات",
+  "app_subtitle": "بوابة العقارات",
+  "welcome": "مرحبًا بك في مجموعة أدوات العقارات",
   "about": "معلومات عنا",
   "loading": "جار التحميل...",
   "success": "نجاح",
-  "error": "خطأ"
+  "error": "خطأ",
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك",
+    "email_label": "البريد الإلكتروني",
+    "password_label": "كلمة المرور",
+    "password_placeholder": "أدخل كلمة المرور",
+    "submit_button": "تسجيل الدخول"
+  },
+  "signup": {
+    "title": "إنشاء حساب",
+    "subtitle": "أدخل بريدك الإلكتروني أدناه لإنشاء حسابك",
+    "name_label": "الاسم",
+    "email_label": "البريد الإلكتروني",
+    "password_label": "كلمة المرور",
+    "password_placeholder": "أنشئ كلمة مرور",
+    "confirm_password_label": "تأكيد كلمة المرور",
+    "confirm_password_placeholder": "أكد كلمة المرور",
+    "submit_button": "إنشاء حساب"
+  },
+  "logout": "تسجيل الخروج",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "full_name": "الاسم الكامل",
+  "company_name": "اسم الشركة (اختياري)",
+  "dont_have_account": "ليس لديك حساب؟",
+  "already_have_account": "لديك حساب بالفعل؟",
+  "signing_in": "جاري تسجيل الدخول...",
+  "signing_up": "جاري إنشاء الحساب...",
+  "welcome_back": "مرحبًا بعودتك",
+  "create_account": "إنشاء حساب جديد",
+  "enter_credentials": "أدخل بيانات اعتمادك للوصول إلى حسابك",
+  "enter_details": "أدخل تفاصيلك لإنشاء حسابك",
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "nav": {
+      "overview": "نظرة عامة",
+      "properties": "العقارات",
+      "leads": "العملاء المحتملين",
+      "users": "المستخدمين"
+    },
+    "stats": {
+      "total_properties": "إجمالي العقارات",
+      "active_leads": "العملاء النشطين",
+      "total_revenue": "إجمالي الإيرادات",
+      "active_users": "المستخدمين النشطين",
+      "properties_change": "+{{count}} هذا الشهر",
+      "leads_change": "+{{count}} هذا الأسبوع",
+      "revenue_change": "+{{percent}}% من الشهر الماضي",
+      "users_online": "{{count}} متصل الآن"
+    },
+    "quick_actions": {
+      "add_property": "إضافة عقار",
+      "add_property_desc": "إدراج عقار جديد",
+      "new_lead": "عميل جديد",
+      "new_lead_desc": "إنشاء عميل محتمل جديد",
+      "manage_users": "إدارة المستخدمين",
+      "manage_users_desc": "عرض أعضاء الفريق"
+    },
+    "activity": {
+      "title": "النشاط الأخير",
+      "subtitle": "آخر التحديثات من لوحة التحكم",
+      "property_listed": "تم إدراج عقار جديد",
+      "lead_converted": "تم تحويل العميل المحتمل إلى عميل",
+      "property_sold": "تم بيع العقار",
+      "time_hours_ago": "منذ {{count}} ساعة",
+      "time_days_ago": "منذ {{count}} يوم",
+      "time_days_ago_plural": "منذ {{count}} يوم"
+    },
+    "help": {
+      "title": "هل تحتاج مساعدة؟",
+      "description": "تواصل مع فريق الدعم"
+    }
+  },
+  "user_menu": {
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات"
+  },
+  "sidebar": {
+    "title": "مركز العقارات",
+    "collapse": "طي الشريط الجانبي",
+    "expand": "توسيع الشريط الجانبي",
+    "logout": "تسجيل الخروج"
+  },
+  "logout_dialog": {
+    "title": "تأكيد تسجيل الخروج",
+    "description": "هل أنت متأكد أنك تريد تسجيل الخروج؟ ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى حسابك.",
+    "cancel": "إلغاء",
+    "confirm": "تسجيل الخروج"
+  },
+  "hey": "مرحبًا",
+  "validation": {
+    "invalid_email": "بريد إلكتروني غير صالح",
+    "password_too_short": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "passwords_do_not_match": "كلمات المرور غير متطابقة",
+    "required": "هذا الحقل مطلوب",
+    "name_min_length": "يجب أن يكون الاسم حرفين على الأقل"
+  },
+  "mobile": {
+    "navigation": "التنقل",
+    "menu": "القائمة"
+  },
+  "placeholders": {
+    "email": "name@example.com",
+    "password": "أدخل كلمة المرور",
+    "confirm_password": "أكد كلمة المرور",
+    "full_name": "جون دو",
+    "company_name": "شركة أكيم"
+  }
 }

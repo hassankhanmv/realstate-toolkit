@@ -1,7 +1,118 @@
 {
+  "app_name": "UAE Estates",
+  "app_subtitle": "Real Estate Portal",
   "welcome": "Welcome to RealEstate Toolkit",
   "about": "About Us",
   "loading": "Loading...",
   "success": "Success",
-  "error": "Error"
+  "error": "Error",
+  "login": {
+    "title": "Login",
+    "subtitle": "Enter your email below to login to your account",
+    "email_label": "Email",
+    "password_label": "Password",
+    "password_placeholder": "Enter your password",
+    "submit_button": "Sign In"
+  },
+  "signup": {
+    "signup_title": "Sign Up",
+    "title": "Create an account",
+    "subtitle": "Enter your email below to create your account",
+    "name_label": "Name",
+    "email_label": "Email",
+    "password_label": "Password",
+    "password_placeholder": "Create a password",
+    "confirm_password_label": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
+    "submit_button": "Sign Up"
+  },
+  "logout": "Logout",
+  "email": "Email",
+  "password": "Password",
+  "full_name": "Full Name",
+  "company_name": "Company Name (Optional)",
+  "dont_have_account": "Don't have an account?",
+  "already_have_account": "Already have an account?",
+  "signing_in": "Signing in...",
+  "signing_up": "Signing up...",
+  "welcome_back": "Welcome back",
+  "create_account": "Create an account",
+  "enter_credentials": "Enter your credentials to access your account",
+  "enter_details": "Enter your details to create your account",
+  "dashboard": {
+    "title": "Dashboard",
+    "nav": {
+      "overview": "Overview",
+      "properties": "Properties",
+      "leads": "Leads",
+      "users": "Users"
+    },
+    "stats": {
+      "total_properties": "Total Properties",
+      "active_leads": "Active Leads",
+      "total_revenue": "Total Revenue",
+      "active_users": "Active Users",
+      "properties_change": "+{{count}} this month",
+      "leads_change": "+{{count}} this week",
+      "revenue_change": "+{{percent}}% from last month",
+      "users_online": "{{count}} online now"
+    },
+    "quick_actions": {
+      "add_property": "Add Property",
+      "add_property_desc": "List a new property",
+      "new_lead": "New Lead",
+      "new_lead_desc": "Create a new lead",
+      "manage_users": "Manage Users",
+      "manage_users_desc": "View team members"
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "subtitle": "Latest updates from your dashboard",
+      "property_listed": "New property listed",
+      "lead_converted": "Lead converted to client",
+      "property_sold": "Property sold",
+      "time_hours_ago": "{{count}} hours ago",
+      "time_days_ago": "{{count}} day ago",
+      "time_days_ago_plural": "{{count}} days ago"
+    },
+    "help": {
+      "title": "Need Help?",
+      "description": "Contact our support team"
+    }
+  },
+  "user_menu": {
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "sidebar": {
+    "title": "Property Hub",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "logout": "Logout"
+  },
+  "logout_dialog": {
+    "title": "Confirm Logout",
+    "description": "Are you sure you want to logout? You will need to login again to access your account.",
+    "cancel": "Cancel",
+    "confirm": "Logout"
+  },
+  "hey": "Hey",
+  "validation": {
+    "invalid_email": "Invalid email address",
+    "password_too_short": "Password must be at least 8 characters",
+    "passwords_do_not_match": "Passwords do not match",
+    "required": "This field is required",
+    "name_min_length": "Name must be at least 2 characters"
+  },
+  "mobile": {
+    "navigation": "Navigation",
+    "menu": "Menu"
+  },
+  "placeholders": {
+    "email": "name@example.com",
+    "password": "Enter your password",
+    "confirm_password": "Confirm your password",
+    "full_name": "John Doe",
+    "company_name": "Acme Inc."
+  }
 }

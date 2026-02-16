@@ -1,87 +1,190 @@
-# Welcome to React Router!
+# Real Estate Toolkit - Web Application
 
-A modern, production-ready template for building full-stack React applications using React Router.
+A modern, production-ready real estate management platform built with React Router, Redux, and Supabase authentication. Designed specifically for the UAE market with full Arabic (RTL) support.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## 🏗 ️ Project Architecture
 
-## Features
+### Technology Stack
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- **Frontend Framework**: React 19.2 with React Router
+- **State Management**: Redux Toolkit
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS with custom theme
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Internationalization**: react-i18next
+- **Build Tool**: Vite
+- **Language**: TypeScript
 
-## Getting Started
+### Directory Structure
 
-### Installation
+```
+web/
+├── app/
+│   ├── components/
+│   │   ├── common/          # Shared components (Banner, LogoutConfirmDialog)
+│   │   ├── dashboard/       # Dashboard-specific components (Tile, Sidebar, Header)
+│   │   ├── layouts/         # Layout components (DashboardLayout)
+│   │   └── ui/              # shadcn/ui components (Button, Card, etc.)
+│   ├── config/
+│   │   └── menuConfig.ts    # Sidebar and header menu configuration
+│   ├── constants/
+│   │   ├── common.ts        # App constants (routes, config, storage keys)
+│   │   └── index.ts         # Barrel exports
+│   ├── lib/                # Utility functions (Supabase client, utils)
+│   ├── routes/              # Page components (dashboard, login, signup)
+│   ├── store/              # Redux store, slices
+│   ├── types/              # TypeScript type definitions
+│   ├── app.css             # Global styles and theme
+│   └── root.tsx            # App entry point
+├── public/
+│   └── locales/            # Translation files (en, ar)
+│       ├── en/common.json
+│       └── ar/common.json
+└── package.json
+```
 
-Install the dependencies:
+## 🎨 Dashboard Architecture
+
+### Component Hierarchy
+
+```
+DashboardLayout
+├── Sidebar (collapsible)
+│   ├── Branding
+│   ├── Navigation Menu (from menuConfig)
+│   ├── Help Section
+│   └── Logout Button (with confirmation dialog)
+├── Header
+│   ├── Mobile Menu Toggle (Sheet)
+│   ├── Language Switcher
+│   └── User Menu (from menuConfig)
+└── Main Content
+    └── Dashboard Route
+        ├── Stats Grid (Tile components)
+        ├── Quick Actions Cards
+        └── Recent Activity
+```
+
+### Key Dashboard Components
+
+#### Tile Component
+
+**Path**: `/components/dashboard/Tile.tsx`
+
+Flexible stats card with auto-adjusting layout.
+
+**Usage:**
+
+```tsx
+<Tile
+  title="Total Properties"
+  value="12"
+  icon={Building2}
+  trend={{ value: "+2 this month", direction: "up" }}
+/>
+```
+
+#### Sidebar Component
+
+**Path**: `/components/dashboard/Sidebar.tsx`
+
+**Features:**
+
+- Collapsible (280px → 64px)
+- State persisted in localStorage
+- Menu items from `config/menuConfig.ts`
+- Active state with accent color
+- Logout button with confirmation dialog
+
+## 🌍 Internationalization (i18n)
+
+- **Library**: react-i18next
+- **Supported Languages**: English (en), Arabic (ar)
+- **Translation Files**: `/public/locales/{lang}/common.json`
+
+### RTL Support
+
+Uses Tailwind directional utilities:
+
+- `ps-*` (padding-start) instead of `pl-*`
+- `pe-*` (padding-end) instead of `pr-*`
+- `ms-*` (margin-start) instead of `ml-*`
+- `me-*` (margin-end) instead of `mr-*`
+- `start-0` / `end-0` for positioning
+
+## 🔐 State Management
+
+### Global App Object
+
+Accessible via `window.App`:
+
+```typescript
+window.App = {
+  store, // Redux store
+  validation, // Validation schemas
+  translateStatic, // Static translation function
+  actions: {
+    // Common Redux actions
+    setLoading,
+    addToast,
+    removeToast,
+  },
+  menuItems: {
+    // Menu configuration
+    sidebar,
+    userMenu,
+  },
+  constants: {
+    // App constants
+    APP_CONFIG,
+    UI_CONFIG,
+    ROUTES,
+    STORAGE_KEYS,
+  },
+};
+```
+
+## 🎨 Theme System
+
+**Primary Theme**: Deep Slate & Gold (UAE-appropriate)
+
+```css
+--primary: hsl(222 47% 11%) /* Deep Slate */ --accent: hsl(38 52% 58%)
+  /* Gold/Sand */;
+```
+
+## 🚀 Development
+
+### Running Locally
 
 ```bash
-npm install
+# From root
+pnpm install
+pnpm dev
 ```
 
-### Development
-
-Start the development server with HMR:
+### Build for Production
 
 ```bash
-npm run dev
+pnpm run build
 ```
 
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
+## 🌐 Environment Variables
 
 ```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-## Styling
+## 🎯 Best Practices
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+1. **Always use translation keys** - Never hardcode text
+2. **Use directional utilities** for RTL support
+3. **Keep components small and focused**
+4. **Use TypeScript** - Type everything
+5. **Follow shadcn patterns**
+6. **Test in both languages**
 
 ---
 
-Built with ❤️ using React Router.
+Built with ❤️ for UAE Real Estate Market

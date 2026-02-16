@@ -25,4 +25,15 @@ i18n
     fallbackNS: "common",
   });
 
+// Export a promise that resolves when i18n is fully initialized
+export const i18nReady = new Promise<void>((resolve) => {
+  if (i18n.isInitialized) {
+    resolve();
+  } else {
+    i18n.on("initialized", () => {
+      resolve();
+    });
+  }
+});
+
 export default i18n;
