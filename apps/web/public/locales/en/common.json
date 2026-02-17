@@ -108,6 +108,24 @@
     "navigation": "Navigation",
     "menu": "Menu"
   },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account settings",
+    "name_label": "Full Name",
+    "company_label": "Company Name",
+    "company_placeholder": "Your company (optional)",
+    "email_label": "Email Address",
+    "save_button": "Save Changes",
+    "saving_button": "Saving...",
+    "password_section_title": "Password",
+    "reset_password_button": "Reset Password",
+    "reset_password_desc": "Send password reset email to your inbox",
+    "resetting_password": "Sending...",
+    "reset_password_success": "Password reset email sent successfully",
+    "reset_password_error": "Failed to send password reset email",
+    "success_message": "Profile updated successfully",
+    "error_message": "Failed to update profile"
+  },
   "placeholders": {
     "email": "name@example.com",
     "password": "Enter your password",

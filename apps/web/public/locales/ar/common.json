@@ -107,6 +107,24 @@
     "navigation": "التنقل",
     "menu": "القائمة"
   },
+  "profile": {
+    "title": "الملف الشخصي",
+    "subtitle": "إدارة إعدادات حسابك",
+    "name_label": "الاسم الكامل",
+    "company_label": "اسم الشركة",
+    "company_placeholder": "شركتك (اختياري)",
+    "email_label": "البريد الإلكتروني",
+    "save_button": "حفظ التغييرات",
+    "saving_button": "جارٍ الحفظ...",
+    "password_section_title": "كلمة المرور",
+    "reset_password_button": "إعادة تعيين كلمة المرور",
+    "reset_password_desc": "إرسال بريد إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
+    "resetting_password": "جارٍ الإرسال...",
+    "reset_password_success": "تم إرسال بريد إعادة تعيين كلمة المرور بنجاح",
+    "reset_password_error": "فشل إرسال بريد إعادة تعيين كلمة المرور",
+    "success_message": "تم تحديث الملف الشخصي بنجاح",
+    "error_message": "فشل تحديث الملف الشخصي"
+  },
   "placeholders": {
     "email": "name@example.com",
     "password": "أدخل كلمة المرور",

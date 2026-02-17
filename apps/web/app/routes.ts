@@ -7,6 +7,7 @@ export default [
   route("signup", "routes/signup.tsx"),
   route("logout", "routes/logout.tsx"),
   route("dashboard", "routes/dashboard.tsx"),
+  route("dashboard/profile", "routes/dashboard/profile/index.tsx"),
 
   // API Routes
   route("api/auth/login", "routes/api/auth/login.ts"),

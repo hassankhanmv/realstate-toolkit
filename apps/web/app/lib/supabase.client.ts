@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@repo/supabase";
 
 declare global {
@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-let client: SupabaseClient<Database> | undefined;
+let client: ReturnType<typeof createBrowserClient<Database>> | undefined;
 
 export const getSupabaseBrowser = () => {
   if (typeof window === "undefined") {
@@ -19,7 +19,7 @@ export const getSupabaseBrowser = () => {
 
   if (client) return client;
 
-  client = createClient<Database>(
+  client = createBrowserClient<Database>(
     window.ENV.VITE_SUPABASE_URL,
     window.ENV.VITE_SUPABASE_ANON_KEY,
   );
