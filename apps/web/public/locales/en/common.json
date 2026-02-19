@@ -6,6 +6,24 @@
   "loading": "Loading...",
   "success": "Success",
   "error": "Error",
+  "common": {
+    "previous": "Previous",
+    "next": "Next",
+    "table": {
+      "search_placeholder": "Search...",
+      "no_data": "No data found",
+      "no_data_desc": "There are no records to display.",
+      "total_items": "Total items",
+      "refresh": "Refresh",
+      "add_new": "Add New",
+      "rows_per_page": "Rows per page",
+      "page_of": "Page {{current}} of {{total}}",
+      "go_to_first": "Go to first page",
+      "go_to_prev": "Go to previous page",
+      "go_to_next": "Go to next page",
+      "go_to_last": "Go to last page"
+    }
+  },
   "login": {
     "title": "Login",
     "subtitle": "Enter your email below to login to your account",
@@ -132,5 +150,73 @@
     "confirm_password": "Confirm your password",
     "full_name": "John Doe",
     "company_name": "Acme Inc."
+  },
+  "properties": {
+    "title": "Properties",
+    "subtitle": "Manage your property listings",
+    "add_new": "Add New Property",
+    "search_placeholder": "Search properties...",
+    "status_label": "Status",
+    "type_label": "Type",
+    "no_properties": "No properties found",
+    "no_properties_desc": "Get started by adding your first property",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "delete_confirm_title": "Delete Property",
+    "delete_confirm_desc": "Are you sure you want to delete this property? This action cannot be undone.",
+    "cancel": "Cancel",
+    "save": "Save Property",
+    "saving": "Saving...",
+    "published": "Published",
+    "draft": "Draft",
+    "basics": "Basic Information",
+    "details": "Property Details",
+    "media": "Media & Assets",
+    "publishing": "Publishing Status",
+    "fields": {
+      "title": "Property Title",
+      "price": "Price (AED)",
+      "location": "Location",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "area": "Area (sq ft)",
+      "description": "Description",
+      "type": "Property Type",
+      "status": "Listing Status",
+      "furnished": "Furnished",
+      "amenities": "Amenities",
+      "images": "Images",
+      "floor": "Floor Number",
+      "year_built": "Year Built",
+      "notes": "Internal Notes",
+      "is_published": "Publish Listing"
+    },
+    "types": {
+      "Apartment": "Apartment",
+      "Villa": "Villa",
+      "Townhouse": "Townhouse",
+      "Office": "Office",
+      "Plot": "Plot",
+      "Commercial": "Commercial"
+    },
+    "statuses": {
+      "For Sale": "For Sale",
+      "For Rent": "For Rent",
+      "Off-Plan": "Off-Plan",
+      "Ready": "Ready"
+    },
+    "errors": {
+      "fetch_failed": "Failed to fetch properties",
+      "create_failed": "Failed to create property",
+      "update_failed": "Failed to update property",
+      "delete_failed": "Failed to delete property",
+      "image_upload_failed": "Failed to upload images"
+    },
+    "success": {
+      "created": "Property created successfully",
+      "updated": "Property updated successfully",
+      "deleted": "Property deleted successfully"
+    }
   }
 }

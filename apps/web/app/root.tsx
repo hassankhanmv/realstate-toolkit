@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { useTranslation } from "react-i18next";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -57,15 +58,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       VITE_SUPABASE_ANON_KEY: string;
     };
   };
+  const { i18n } = useTranslation();
   return (
-    <html lang="en">
+    <html lang={i18n.language} dir={i18n.dir()}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="antialiased">
         <Provider store={store}>
           <I18nLoader>{children}</I18nLoader>
           <GlobalSpinner />

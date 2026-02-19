@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 // ---------- BROWSER CLIENT ----------
 export const createBrowserClient = (
   supabaseUrl: string,
-  supabaseAnonKey: string
+  supabaseAnonKey: string,
 ) => {
   return createClient(supabaseUrl, supabaseAnonKey);
 };
@@ -12,11 +12,11 @@ export const createBrowserClient = (
 export const createServerClient = (
   supabaseUrl: string,
   supabaseAnonKey: string,
-  headers?: Headers
+  headers?: Headers,
 ) => {
   return createClient(supabaseUrl, supabaseAnonKey, {
     global: {
-      headers: headers ? Object.fromEntries(headers.entries()) : {},
+      headers: headers ? Object.fromEntries((headers as any).entries()) : {},
     },
   });
 };
@@ -24,7 +24,7 @@ export const createServerClient = (
 // ---------- MOBILE CLIENT ----------
 export const createMobileClient = (
   supabaseUrl: string,
-  supabaseAnonKey: string
+  supabaseAnonKey: string,
 ) => {
   return createClient(supabaseUrl, supabaseAnonKey);
 };

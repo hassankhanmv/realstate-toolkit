@@ -36,22 +36,6 @@ export const getCurrentUser = async (supabase: SupabaseClient<Database>) => {
   return await supabase.auth.getUser();
 };
 
-export const getAllProperties = async (supabase: SupabaseClient<Database>) => {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .order("created_at", { ascending: false });
-  return { data, error };
-};
+// Properties methods are now in properties.ts
 
-export const getPropertyById = async (
-  supabase: SupabaseClient<Database>,
-  id: string,
-) => {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("id", id)
-    .single();
-  return { data, error };
-};
+// properties methods

@@ -6,6 +6,18 @@
   "loading": "جار التحميل...",
   "success": "نجاح",
   "error": "خطأ",
+  "common": {
+    "previous": "السابق",
+    "next": "التالي",
+    "table": {
+      "search_placeholder": "بحث...",
+      "no_data": "لم يتم العثور على بيانات",
+      "no_data_desc": "لا توجد سجلات لعرضها.",
+      "total_items": "إجمالي العناصر",
+      "refresh": "تحديث",
+      "add_new": "إضافة جديد"
+    }
+  },
   "login": {
     "title": "تسجيل الدخول",
     "subtitle": "أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك",
@@ -131,5 +143,73 @@
     "confirm_password": "أكد كلمة المرور",
     "full_name": "جون دو",
     "company_name": "شركة أكيم"
+  },
+  "properties": {
+    "title": "العقارات",
+    "subtitle": "إدارة قوائم العقارات الخاصة بك",
+    "add_new": "إضافة عقار جديد",
+    "search_placeholder": "بحث في العقارات...",
+    "status_label": "الحالة",
+    "type_label": "النوع",
+    "no_properties": "لم يتم العثور على عقارات",
+    "no_properties_desc": "ابدأ بإضافة عقارك الأول",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "view": "عرض",
+    "delete_confirm_title": "حذف العقار",
+    "delete_confirm_desc": "هل أنت متأكد أنك تريد حذف هذا العقار؟ لا يمكن التراجع عن هذا الإجراء.",
+    "cancel": "إلغاء",
+    "save": "حفظ العقار",
+    "saving": "جارٍ الحفظ...",
+    "published": "منشور",
+    "draft": "مسودة",
+    "basics": "المعلومات الأساسية",
+    "details": "تفاصيل العقار",
+    "media": "الوسائط والصور",
+    "publishing": "حالة النشر",
+    "fields": {
+      "title": "عنوان العقار",
+      "price": "السعر (درهم)",
+      "location": "الموقع",
+      "bedrooms": "غرف النوم",
+      "bathrooms": "الحمامات",
+      "area": "المساحة (قدم مربع)",
+      "description": "الوصف",
+      "type": "نوع العقار",
+      "status": "حالة العرض",
+      "furnished": "مفروش",
+      "amenities": "المرافق",
+      "images": "الصور",
+      "floor": "رقم الطابق",
+      "year_built": "سنة البناء",
+      "notes": "ملاحظات داخلية",
+      "is_published": "نشر القائمة"
+    },
+    "types": {
+      "Apartment": "شقة",
+      "Villa": "فيلا",
+      "Townhouse": "تاون هاوس",
+      "Office": "مكتب",
+      "Plot": "أرض",
+      "Commercial": "تجاري"
+    },
+    "statuses": {
+      "For Sale": "للبيع",
+      "For Rent": "للإيجار",
+      "Off-Plan": "قيد الإنشاء",
+      "Ready": "جاهز"
+    },
+    "errors": {
+      "fetch_failed": "فشل جلب العقارات",
+      "create_failed": "فشل إنشاء العقار",
+      "update_failed": "فشل تحديث العقار",
+      "delete_failed": "فشل حذف العقار",
+      "image_upload_failed": "فشل رفع الصور"
+    },
+    "success": {
+      "created": "تم إنشاء العقار بنجاح",
+      "updated": "تم تحديث العقار بنجاح",
+      "deleted": "تم حذف العقار بنجاح"
+    }
   }
 }

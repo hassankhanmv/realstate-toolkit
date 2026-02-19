@@ -17,13 +17,83 @@ export type Database = {
           title: string;
           price: number;
           description: string | null;
-          location: string | null;
-          bedrooms: number | null;
-          bathrooms: number | null;
-          area: number | null;
+          location: string;
+          bedrooms: number;
+          bathrooms: number;
+          area: number;
+          furnished: boolean;
+          rooms: number | null;
+          type:
+            | "Apartment"
+            | "Villa"
+            | "Townhouse"
+            | "Office"
+            | "Plot"
+            | "Commercial";
+          amenities: string[] | null;
           images: string[] | null;
+          floor: number | null;
+          year_built: number | null;
+          status: "For Sale" | "For Rent" | "Off-Plan" | "Ready";
+          notes: string | null;
           is_published: boolean;
           created_at: string;
+        };
+        Insert: {
+          id?: string;
+          broker_id: string;
+          title: string;
+          price: number;
+          description?: string | null;
+          location: string;
+          bedrooms: number;
+          bathrooms: number;
+          area: number;
+          furnished?: boolean;
+          rooms?: number | null;
+          type:
+            | "Apartment"
+            | "Villa"
+            | "Townhouse"
+            | "Office"
+            | "Plot"
+            | "Commercial";
+          amenities?: string[] | null;
+          images?: string[] | null;
+          floor?: number | null;
+          year_built?: number | null;
+          status: "For Sale" | "For Rent" | "Off-Plan" | "Ready";
+          notes?: string | null;
+          is_published?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          broker_id?: string;
+          title?: string;
+          price?: number;
+          description?: string | null;
+          location?: string;
+          bedrooms?: number;
+          bathrooms?: number;
+          area?: number;
+          furnished?: boolean;
+          rooms?: number | null;
+          type?:
+            | "Apartment"
+            | "Villa"
+            | "Townhouse"
+            | "Office"
+            | "Plot"
+            | "Commercial";
+          amenities?: string[] | null;
+          images?: string[] | null;
+          floor?: number | null;
+          year_built?: number | null;
+          status?: "For Sale" | "For Rent" | "Off-Plan" | "Ready";
+          notes?: string | null;
+          is_published?: boolean;
+          created_at?: string;
         };
       };
       leads: {
