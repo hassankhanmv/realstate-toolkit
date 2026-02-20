@@ -8,7 +8,8 @@ export default [
   route("logout", "routes/logout.tsx"),
   route("dashboard", "routes/dashboard.tsx"),
   route("dashboard/profile", "routes/dashboard/profile/index.tsx"),
-  route("dashboard/properties", "routes/dashboard/properties.tsx"),
+  route("dashboard/properties", "routes/dashboard/properties/index.tsx"),
+  route("dashboard/properties/:id", "routes/dashboard/properties/$id.tsx"),
 
   // API Routes
   route("api/auth/login", "routes/api/auth/login.ts"),

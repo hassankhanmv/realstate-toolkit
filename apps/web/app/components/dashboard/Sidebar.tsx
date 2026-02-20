@@ -5,11 +5,11 @@ import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { sidebarMenuItems } from "@/config/menuConfig";
 import { Button } from "@/components/ui/button";
 import { memo, useCallback, useMemo, useState } from "react";
-import { LogoutConfirmDialog } from "@/components/common/LogoutConfirmDialog";
 import { signOutUser } from "@repo/supabase";
 import { resetAuth } from "@/store/slices/authSlice";
 import { useDispatch } from "react-redux";
 import { getSupabaseBrowser } from "@/lib/supabase.client";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   collapsed?: boolean;
@@ -161,10 +161,13 @@ export const Sidebar = memo(
         </div>
 
         {/* Logout Confirmation Dialog */}
-        <LogoutConfirmDialog
-          open={showLogoutDialog}
-          onOpenChange={setShowLogoutDialog}
+        <ConfirmDialog
+          isOpen={showLogoutDialog}
+          onClose={() => setShowLogoutDialog(false)}
           onConfirm={handleLogout}
+          title={t("logout_dialog.title")}
+          description={t("logout_dialog.description")}
+          confirmText={t("logout_dialog.confirm")}
         />
       </>
     );

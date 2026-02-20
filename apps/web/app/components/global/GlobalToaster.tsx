@@ -13,7 +13,6 @@ export function GlobalToaster() {
       if (!processedToasts.current.has(toast.id)) {
         processedToasts.current.add(toast.id);
 
-        // Trigger Sonner toast
         if (toast.type === "success") {
           sonnerToast.success(toast.message, { duration: toast.duration });
         } else if (toast.type === "error") {
@@ -26,8 +25,6 @@ export function GlobalToaster() {
           sonnerToast(toast.message, { duration: toast.duration });
         }
 
-        // Remove from Redux immediately as Sonner handles visibility
-        // Short delay to avoid race conditions with strict mode double-invokes
         setTimeout(() => {
           dispatch(removeToast(toast.id));
           processedToasts.current.delete(toast.id);
@@ -36,5 +33,6 @@ export function GlobalToaster() {
     });
   }, [toasts, dispatch]);
 
-  return <Toaster />;
+  // richColors makes the toasts brightly colored based on their status!
+  return <Toaster richColors closeButton position="top-right" />;
 }

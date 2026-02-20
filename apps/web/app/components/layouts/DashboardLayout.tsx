@@ -9,18 +9,11 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-/**
- * DashboardLayout - Responsive layout component
- *
- * Desktop (≥768px): Sidebar + Header
- * Mobile (<768px): Bottom Nav + Drawer
- */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Load sidebar state from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("sidebar-collapsed");
@@ -30,12 +23,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Memoize the collapse handler to prevent Sidebar re-renders
   const handleSidebarChange = useCallback((collapsed: boolean) => {
     setSidebarCollapsed(collapsed);
   }, []);
@@ -49,9 +40,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Desktop Sidebar - hidden on mobile */}
-      <aside className="hidden md:block fixed start-0 top-0 z-40 h-screen border-e border-slate-200">
+    // Changed hardcoded bg-slate-50 to theme-compliant bg-background
+    <div className="flex min-h-screen bg-background text-foreground">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:block fixed start-0 top-0 z-40 h-screen border-e border-border bg-card">
         <Sidebar
           collapsed={sidebarCollapsed}
           onCollapsedChange={handleSidebarChange}
@@ -59,19 +51,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
+      {/* FIX: Replaced inline styles with responsive Tailwind classes. 
+          md:ms-16 = 64px on desktop only. md:ms-72 = 288px on desktop only. */}
       <div
-        className="flex flex-col w-full md:transition-all md:duration-300"
-        style={{
-          marginInlineStart: sidebarCollapsed ? "64px" : "288px",
-        }}
+        className={`flex flex-col w-full min-h-screen transition-all duration-300 ${
+          sidebarCollapsed ? "md:ms-16" : "md:ms-72"
+        }`}
       >
-        {/* Desktop Header - hidden on mobile */}
-        <Header className="hidden md:flex" />
+        {/* Desktop Header */}
+        <Header className="hidden md:flex bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-30" />
 
-        {/* Main Content - Extra bottom padding on mobile for bottom nav */}
-        <main className="flex-1 p-4 md:p-8 pb-20 md:pb-8">{children}</main>
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 md:p-8 pb-24 md:pb-8">{children}</main>
 
-        {/* Mobile Bottom Nav - hidden on desktop */}
+        {/* Mobile Bottom Nav */}
         <MobileBottomNav
           className="md:hidden"
           isMenuOpen={mobileMenuOpen}

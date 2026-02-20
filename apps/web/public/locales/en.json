@@ -9,6 +9,8 @@
   "common": {
     "previous": "Previous",
     "next": "Next",
+    "cancel": "Cancel",
+    "loading": "Loading...",
     "table": {
       "search_placeholder": "Search...",
       "no_data": "No data found",
@@ -155,6 +157,9 @@
     "title": "Properties",
     "subtitle": "Manage your property listings",
     "add_new": "Add New Property",
+    "view_live": "View Live",
+    "danger_zone": "Danger Zone",
+    "delete_desc": "Permanently delete this property and all its associated data.",
     "search_placeholder": "Search properties...",
     "status_label": "Status",
     "type_label": "Type",
@@ -174,6 +179,7 @@
     "details": "Property Details",
     "media": "Media & Assets",
     "publishing": "Publishing Status",
+    "open_detail": "Open Detail",
     "fields": {
       "title": "Property Title",
       "price": "Price (AED)",

@@ -1,4 +1,4 @@
-import type { Route } from "./+types/properties.$id";
+import type { Route } from "./+types/$id";
 import { data } from "react-router";
 import { getSupabaseServer } from "@/lib/supabase.server";
 import {

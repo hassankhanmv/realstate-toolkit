@@ -13,8 +13,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import { LogoutConfirmDialog } from "@/components/common/LogoutConfirmDialog";
-import { signOutUser } from "@repo/supabase";
 import { resetAuth } from "@/store/slices/authSlice";
 import type { RootState } from "@/store/store";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -23,6 +21,8 @@ import { Sidebar } from "./Sidebar";
 import { getSupabaseBrowser } from "@/lib/supabase.client";
 import { userMenuItems } from "@/config/menuConfig";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
+import { signOutUser } from "@repo/supabase";
 
 /**
  * Header Component - Optimized top navigation
@@ -153,10 +153,13 @@ export const Header = memo(
         </header>
 
         {/* Logout Confirmation Dialog */}
-        <LogoutConfirmDialog
-          open={showLogoutDialog}
-          onOpenChange={setShowLogoutDialog}
+        <ConfirmDialog
+          isOpen={showLogoutDialog}
+          onClose={() => setShowLogoutDialog(false)}
           onConfirm={handleLogout}
+          title={t("logout_dialog.title")}
+          description={t("logout_dialog.description")}
+          confirmText={t("logout_dialog.confirm")}
         />
       </>
     );

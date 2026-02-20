@@ -1,0 +1,348 @@
+import { useState } from "react";
+import type { Route } from "./+types/$id";
+import { data, Link, useFetcher, useNavigate } from "react-router"; // Added useNavigate
+import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getSupabaseServer } from "@/lib/supabase.server";
+import { type Property } from "@repo/supabase";
+import {
+  propertySchema,
+  type PropertyFormValues,
+} from "@/validations/property";
+
+import { PropertyBasicInfo } from "~/components/properties/PropertyBasicInfo";
+import { PropertySpecs } from "~/components/properties/PropertySpecs";
+import { PropertyPublishing } from "~/components/properties/PropertyPublishing";
+import { DashboardLayout } from "~/components/layouts/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Form } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ArrowLeft,
+  Save,
+  Eye,
+  Trash2,
+  Globe,
+  Home,
+  Settings2,
+} from "lucide-react";
+import { useAppDispatch } from "~/store/hooks";
+import { setLoading, addToast } from "~/store/slices/uiSlice";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+// ── Loader ──────────────────────────────────────────────────────────────────
+
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
+  const { supabase, headers } = getSupabaseServer(request);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw data({ error: "Unauthorized" }, { status: 401, headers });
+
+  // Fetch the specific property
+  const { data: propertyData, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("id", params.id as string)
+    .single();
+
+  const property = propertyData as unknown as Property;
+
+  if (error || !property) {
+    throw data({ error: "Property not found" }, { status: 404, headers });
+  }
+
+  // Map the flat DB data to our scalable, nested Zod structure
+  const formData: PropertyFormValues = {
+    basicInfo: {
+      title: property.title,
+      price: property.price,
+      location: property.location,
+      type: property.type as any,
+      status: property.status as any,
+    },
+    specifications: {
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      area: property.area,
+      furnished: property.furnished,
+    },
+    publishing: {
+      description: property.description ?? "",
+      is_published: property.is_published,
+      notes: property.notes ?? "",
+    },
+  };
+
+  return data({ property, formData }, { headers });
+};
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function getStatusStyles(status: string) {
+  switch (status) {
+    case "For Sale":
+      return "border-accent text-accent bg-accent/10";
+    case "For Rent":
+      return "border-primary text-primary bg-primary/5";
+    case "Off-Plan":
+      return "border-muted-foreground text-muted-foreground bg-muted/50";
+    default:
+      return "border-border text-foreground bg-background";
+  }
+}
+
+// ── Page Component ───────────────────────────────────────────────────────────
+
+export default function PropertyDetailPage({
+  loaderData,
+}: Route.ComponentProps) {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate(); // For redirecting after delete
+  const { property, formData } = loaderData;
+
+  const [activeSection, setActiveSection] = useState("basic-info");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Delete dialog state
+
+  const form = useForm<PropertyFormValues>({
+    resolver: zodResolver(propertySchema) as any,
+    defaultValues: formData,
+  });
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+
+  const onSubmit = async (values: PropertyFormValues) => {
+    dispatch(setLoading(true));
+    try {
+      const flatData = {
+        ...values.basicInfo,
+        ...values.specifications,
+        ...values.publishing,
+      };
+
+      const res = await fetch(`/api/properties/${property.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(flatData),
+      });
+
+      if (!res.ok) throw new Error("Update failed");
+      dispatch(addToast({ message: t("properties.success.updated"), type: "success" }));
+    } catch (err) {
+      dispatch(addToast({ message: t("properties.errors.update_failed"), type: "error" }));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handleDelete = async () => {
+    dispatch(setLoading(true));
+    try {
+      const res = await fetch(`/api/properties/${property.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+      
+      dispatch(addToast({ message: t("properties.success.deleted"), type: "success" }));
+      // Redirect back to the properties table
+      navigate("/dashboard/properties");
+    } catch (err) {
+      dispatch(addToast({ message: t("properties.errors.delete_failed"), type: "error" }));
+    } finally {
+      dispatch(setLoading(false));
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  const handleViewLive = () => {
+    // Opens your public frontend listing page in a new tab
+    // Adjust "/listing/" to whatever your public route actually is
+    window.open(`/listing/${property.id}`, "_blank");
+  };
+
+  // Sidebar navigation sections
+  const sections = [
+    { id: "basic-info", label: t("properties.basics"), icon: Home },
+    { id: "specifications", label: t("properties.details"), icon: Settings2 },
+    { id: "publishing", label: t("properties.publishing"), icon: Globe },
+    // Ready for scale:
+    // { id: "media", label: t("properties.media"), icon: Image },
+    // { id: "financials", label: t("properties.financials"), icon: DollarSign },
+  ];
+
+  return (
+    <DashboardLayout>
+      <Form {...(form as any)}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit as any)}
+          className="flex flex-col gap-6 relative"
+        >
+          {/* ── Top Header (Sticky) ── */}
+          <div className="sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-4 border-b border-border/50 pt-2 -mx-6 px-6 lg:-mx-8 lg:px-8">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  className="h-7 w-7 rounded-md"
+                >
+                  <Link to="/dashboard/properties">
+                    <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+                  </Link>
+                </Button>
+                <span>{t("properties.title") || "Properties"}</span>
+                <span>/</span>
+                <span className="truncate max-w-[200px]">{property.title}</span>
+              </div>
+              <div className="flex items-center gap-3 mt-1">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  {property.title}
+                </h1>
+                <Badge
+                  variant="outline"
+                  className={`px-2.5 py-0.5 text-xs font-semibold ${getStatusStyles(property.status)}`}
+                >
+                  {t(`properties.statuses.${property.status}`)}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 px-4 font-medium"
+                onClick={handleViewLive}
+              >
+                <Eye className="h-4 w-4 me-2" />
+                {t("properties.view_live") || "View Live"}
+              </Button>
+              <Button
+                type="submit"
+                className="h-9 px-6 font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                <Save className="h-4 w-4 me-2" />
+                {t("properties.save")}
+              </Button>
+            </div>
+          </div>
+
+          {/* ── Main Layout Grid ── */}
+          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr] gap-8 items-start">
+            {/* Left Sidebar Navigation (Sticky) */}
+            <nav className="hidden md:flex flex-col sticky top-32 gap-1">
+              {sections.map((section) => {
+                const Icon = section.icon;
+                const isActive = activeSection === section.id;
+                return (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-secondary text-foreground"
+                        : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                    />
+                    {section.label}
+                  </a>
+                );
+              })}
+            </nav>
+
+            {/* Right Side Content Areas */}
+            <div className="flex flex-col gap-8 pb-20">
+              {/* Section 1: Basic Info */}
+              <Card
+                id="basic-info"
+                className="scroll-mt-32 border-border shadow-sm"
+              >
+                <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                  <CardTitle className="text-lg font-semibold">
+                    {t("properties.basics")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <PropertyBasicInfo form={form as any} />
+                </CardContent>
+              </Card>
+
+              {/* Section 2: Specifications */}
+              <Card
+                id="specifications"
+                className="scroll-mt-32 border-border shadow-sm"
+              >
+                <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                  <CardTitle className="text-lg font-semibold">
+                    {t("properties.details")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <PropertySpecs form={form as any} />
+                </CardContent>
+              </Card>
+
+              {/* Section 3: Publishing */}
+              <Card
+                id="publishing"
+                className="scroll-mt-32 border-border shadow-sm"
+              >
+                <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                  <CardTitle className="text-lg font-semibold">
+                    {t("properties.publishing")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <PropertyPublishing form={form as any} />
+                </CardContent>
+              </Card>
+
+              {/* Danger Zone */}
+              <Card className="border-destructive/30 shadow-sm mt-8">
+                <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
+                  <div className="space-y-1">
+                    <p className="font-semibold text-foreground">
+                      {t("properties.danger_zone") || "Danger Zone"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("properties.delete_desc") ||
+                        "Permanently delete this property and all its associated data."}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="shrink-0 font-semibold"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 me-2" />
+                    {t("properties.delete")}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </form>
+      </Form>
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        title={t("properties.delete_confirm_title")}
+        description={t("properties.delete_confirm_desc")}
+        confirmText={t("properties.delete")}
+        variant="destructive"
+      />
+    </DashboardLayout>
+  );
+}
