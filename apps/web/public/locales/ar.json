@@ -17,7 +17,13 @@
       "no_data_desc": "لا توجد سجلات لعرضها.",
       "total_items": "إجمالي العناصر",
       "refresh": "تحديث",
-      "add_new": "إضافة جديد"
+      "add_new": "إضافة جديد",
+      "filter_by": "تصفية",
+      "filter_placeholder": "أدخل القيمة...",
+      "filter_select_placeholder": "اختر...",
+      "filter_all": "الكل",
+      "filter_cancel": "إلغاء",
+      "filter_apply": "تطبيق"
     }
   },
   "login": {
@@ -173,6 +179,20 @@
     "media": "الوسائط والصور",
     "publishing": "حالة النشر",
     "open_detail": "فتح التفاصيل",
+    "media_upload_title": "رفع الصور",
+    "media_upload_hint": "اسحب وأفلت الصور أو انقر للتصفح. PNG، JPG، JPEG، WEBP حتى 5 ميغابايت لكل صورة.",
+    "media_drop_text": "أسقط الصور هنا أو انقر للرفع",
+    "media_external_title": "روابط الصور الخارجية",
+    "media_external_hint": "الصق روابط صور Google Drive أو غيرها أدناه.",
+    "media_url_placeholder": "https://drive.google.com/...",
+    "media_add_url": "إضافة",
+    "media_invalid_url": "يرجى إدخال رابط صالح",
+    "media_duplicate_url": "تمت إضافة هذا الرابط بالفعل",
+    "media_preview": "معاينة الصور",
+    "media_uploaded": "مرفوع",
+    "media_linked": "رابط",
+    "media_upload_btn": "رفع الصور",
+    "media_uploading": "جارٍ الرفع...",
     "fields": {
       "title": "عنوان العقار",
       "price": "السعر (درهم)",
@@ -189,7 +209,12 @@
       "floor": "رقم الطابق",
       "year_built": "سنة البناء",
       "notes": "ملاحظات داخلية",
-      "is_published": "نشر القائمة"
+      "is_published": "نشر القائمة",
+      "created_at": "تاريخ الإنشاء",
+      "handover_date": "تاريخ التسليم",
+      "payment_plan": "خطة الدفع",
+      "rera_id": "رقم ريرا",
+      "roi_estimate": "العائد المتوقع %"
     },
     "types": {
       "Apartment": "شقة",
@@ -210,12 +235,158 @@
       "create_failed": "فشل إنشاء العقار",
       "update_failed": "فشل تحديث العقار",
       "delete_failed": "فشل حذف العقار",
-      "image_upload_failed": "فشل رفع الصور"
+      "image_upload_failed": "فشل رفع الصور",
+      "location_required": "الموقع مطلوب",
+      "title_min": "العنوان يجب أن يكون حرفين على الأقل",
+      "title_required": "العنوان مطلوب",
+      "price_required": "السعر مطلوب",
+      "bedrooms_required": "عدد غرف النوم مطلوب",
+      "bathrooms_required": "عدد الحمامات مطلوب",
+      "area_required": "المساحة مطلوبة",
+      "description_required": "الوصف مطلوب",
+      "type_required": "نوع العقار مطلوب",
+      "status_required": "حالة العرض مطلوبة",
+      "furnished_required": "الحالة المفروشة مطلوبة",
+      "amenities_required": "المرافق مطلوبة",
+      "images_required": "الصور مطلوبة",
+      "floor_required": "رقم الطابق مطلوب",
+      "year_built_required": "سنة البناء مطلوبة",
+      "notes_required": "الملاحظات مطلوبة",
+      "image_required_published": "يجب أن يحتوي العقار المنشور على صورة واحدة على الأقل",
+      "invalid_price": "يجب أن يكون السعر أكبر من 0"
+    },
+    "hints": {
+      "handover_date": "التاريخ المتوقع لتسليم العقار",
+      "rera_id": "رقم تصريح ريرا من دائرة الأراضي والأملاك بدبي",
+      "roi_estimate": "نسبة العائد السنوي المتوقع على الاستثمار",
+      "payment_plan": "اذكر جدول الدفع، مثلاً 60/40، 10% حجز...",
+      "area": "أدخل بالقدم المربع"
     },
     "success": {
       "created": "تم إنشاء العقار بنجاح",
       "updated": "تم تحديث العقار بنجاح",
       "deleted": "تم حذف العقار بنجاح"
+    },
+    "off_plan_details": "على المخطط",
+    "view_leads": "عرض العملاء المحتملين",
+    "ai_description": "وصف بالذكاء الاصطناعي",
+    "coming_soon": "قريباً!"
+  },
+  "leads": {
+    "title": "العملاء المحتملين",
+    "subtitle": "إدارة وتتبع استفسارات العقارات الخاصة بك",
+    "no_leads": "لا يوجد عملاء",
+    "no_leads_desc": "لا يوجد عملاء بعد. أضف واحداً!",
+    "cards": {
+      "total_leads": "إجمالي العملاء",
+      "open_leads": "العملاء المفتوحين",
+      "closed_won": "تم الإغلاق بنجاح",
+      "available": "متاح"
+    },
+    "fields": {
+      "name": "الاسم",
+      "phone": "رقم الهاتف",
+      "email": "البريد الإلكتروني",
+      "message": "الرسالة",
+      "status": "الحالة",
+      "notes": "ملاحظات داخلية",
+      "notes_placeholder": "ملاحظات داخلية، غير مرئية للعميل...",
+      "source": "المصدر",
+      "follow_up_date": "تاريخ المتابعة",
+      "property": "العقار المهتم به",
+      "created_at": "تاريخ الاستلام"
+    },
+    "status": {
+      "New": "جديد",
+      "Contacted": "تم التواصل",
+      "Viewing": "معاينة",
+      "Negotiation": "تفاوض",
+      "Won": "تم البيع",
+      "Lost": "خسارة"
+    },
+    "source": {
+      "WhatsApp": "واتساب",
+      "Website": "الموقع",
+      "Referral": "إحالة",
+      "Other": "أخرى"
+    },
+    "actions": {
+      "add_new": "إضافة عميل",
+      "edit": "تعديل العميل",
+      "view": "عرض التفاصيل",
+      "delete": "حذف العميل",
+      "whatsapp": "تحدث عبر واتساب",
+      "call": "اتصال",
+      "email": "إرسال بريد",
+      "save": "حفظ العميل",
+      "cancel": "إلغاء"
+    },
+    "errors": {
+      "fetch_failed": "فشل تحميل العملاء",
+      "create_failed": "فشل إنشاء العميل",
+      "update_failed": "فشل تحديث العميل",
+      "delete_failed": "فشل حذف العميل",
+      "name_required": "الاسم مطلوب",
+      "message_required": "الرسالة مطلوبة",
+      "property_required": "اختيار العقار مطلوب"
+    },
+    "success": {
+      "created": "تم حفظ العميل بنجاح",
+      "updated": "تم تحديث العميل بنجاح",
+      "deleted": "تم حذف العميل بنجاح"
+    },
+    "empty": {
+      "title": "لا يوجد عملاء",
+      "description": "ليس لديك أي عملاء بعد. عندما يستفسر العملاء عن عقاراتك، سيظهرون هنا."
+    },
+    "delete_confirm_title": "حذف العميل",
+    "delete_confirm_desc": "هل أنت متأكد من أنك تريد حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.",
+    "bulk": {
+      "change_status": "تغيير الحالة",
+      "delete_selected": "حذف المحدد",
+      "export_selected": "تصدير المحدد",
+      "assign_property": "تعيين العقار",
+      "select_status": "اختر الحالة...",
+      "select_property": "اختر العقار...",
+      "no_selected": "اختر عميل واحد على الأقل",
+      "status_updated": "تم تحديث حالة {{count}} عميل(ملاء)",
+      "deleted": "تم حذف {{count}} عميل(ملاء)",
+      "assigned": "تم تعيين {{count}} عميل(ملاء)",
+      "confirm_delete_title": "حذف {{count}} عملاء",
+      "confirm_delete_desc": "هل أنت متأكد من حذف {{count}} عميل محدد؟ لا يمكن التراجع.",
+      "selected_count": "{{count}} محدد"
+    },
+    "analytics": {
+      "title": "التحليلات",
+      "by_source": "العملاء حسب المصدر",
+      "by_status": "العملاء حسب الحالة",
+      "conversion_rate": "معدل التحويل",
+      "top_properties": "أفضل العقارات حسب العملاء",
+      "no_data": "لا توجد بيانات للعرض",
+      "won": "تم الفوز",
+      "total": "إجمالي العملاء"
+    },
+    "upcoming": {
+      "title": "المتابعات القادمة",
+      "subtitle": "العملاء المستحقون للمتابعة في الأيام السبعة القادمة",
+      "no_upcoming": "لا توجد متابعات مجدولة",
+      "due_today": "مستحق اليوم",
+      "due_in_days": "مستحق خلال {{count}} يوم",
+      "overdue": "متأخر"
+    },
+    "templates": {
+      "title": "قوالب واتساب",
+      "initial_contact": "مرحباً {{name}}، أتواصل معك بخصوص {{property}}. هل أنت متاح للمعاينة؟",
+      "follow_up": "مرحباً {{name}}، متابعة بخصوص {{property}}. هل لديك أي أسئلة؟",
+      "viewing_invite": "مرحباً {{name}}، لدينا موعد معاينة متاح لـ {{property}}. هل تود الحجز؟",
+      "price_update": "مرحباً {{name}}، هناك تحديث في سعر {{property}}. دعني أشارك التفاصيل.",
+      "select_template": "اختر القالب..."
+    },
+    "export": {
+      "export_all": "تصدير الكل",
+      "export_filtered": "تصدير المصفى",
+      "export_csv": "تصدير CSV",
+      "exported": "تم تصدير البيانات بنجاح"
     }
   }
 }

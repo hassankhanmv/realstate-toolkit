@@ -40,7 +40,18 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ImagePlus,
+  Building2,
+  Info,
+  AlertTriangle,
 } from "lucide-react";
+import { PropertyMedia } from "./PropertyMedia";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const PROPERTY_TYPES = [
   "Apartment",
@@ -63,10 +74,16 @@ interface PropertyFormProps {
   isLoading?: boolean;
   onCancel: () => void;
 }
+
 type FieldName =
   | `basicInfo.${keyof PropertyFormValues["basicInfo"]}`
   | `specifications.${keyof PropertyFormValues["specifications"]}`
-  | `publishing.${keyof PropertyFormValues["publishing"]}`;
+  | `publishing.${keyof PropertyFormValues["publishing"]}`
+  | `media.${keyof PropertyFormValues["media"]}`
+  | "uae.handover_date"
+  | "uae.payment_plan"
+  | "uae.rera_id"
+  | "uae.roi_estimate";
 
 interface StepConfig {
   id: string;
@@ -75,7 +92,8 @@ interface StepConfig {
   fields: FieldName[];
 }
 
-const STEPS: StepConfig[] = [
+// Ensure these perfectly match the fields rendered in each UI block below!
+const BASE_STEPS: StepConfig[] = [
   {
     id: "basicInfo",
     labelKey: "properties.basics",
@@ -100,16 +118,34 @@ const STEPS: StepConfig[] = [
     ],
   },
   {
+    id: "media",
+    labelKey: "properties.media",
+    icon: ImagePlus,
+    fields: ["media.urls", "media.media_urls"],
+  },
+  {
     id: "publishing",
     labelKey: "properties.publishing",
     icon: Globe,
     fields: [
-      "publishing.description",
       "publishing.is_published",
+      "publishing.description",
       "publishing.notes",
     ],
   },
 ];
+
+const UAE_STEP: StepConfig = {
+  id: "uae",
+  labelKey: "properties.off_plan_details",
+  icon: Building2,
+  fields: [
+    "uae.handover_date",
+    "uae.payment_plan",
+    "uae.rera_id",
+    "uae.roi_estimate",
+  ],
+};
 
 export function PropertyForm({
   defaultValues,
@@ -120,7 +156,6 @@ export function PropertyForm({
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Initialize with the nested structure!
   const defaultFormState: PropertyFormValues = {
     basicInfo: {
       title: "",
@@ -131,6 +166,8 @@ export function PropertyForm({
     },
     specifications: { bedrooms: 0, bathrooms: 0, area: 0, furnished: false },
     publishing: { description: "", is_published: true, notes: "" },
+    media: { urls: [], media_urls: [] },
+    uae: {},
   };
 
   const form = useForm<PropertyFormValues>({
@@ -138,10 +175,20 @@ export function PropertyForm({
     defaultValues: defaultValues || defaultFormState,
   });
 
+  // Show Off-Plan step only when status is Off-Plan
+  const watchedStatus = form.watch("basicInfo.status");
+  const STEPS =
+    watchedStatus === "Off-Plan"
+      ? [...BASE_STEPS.slice(0, 3), UAE_STEP, BASE_STEPS[3]]
+      : BASE_STEPS;
+
+  // Only reset form when the actual property being edited changes, not on re-render
+  const defaultsKey = JSON.stringify(defaultValues);
   useEffect(() => {
     form.reset(defaultValues || defaultFormState);
     setCurrentStep(0);
-  }, [defaultValues, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultsKey]);
 
   const {
     formState: { errors },
@@ -168,18 +215,16 @@ export function PropertyForm({
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  // Clean, flat inputs with no generic shadows
   const inputBaseClasses =
     "h-11 rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors";
-  // Brighter, more visible error messages
   const errorClasses = "text-[11px] font-semibold text-red-500 mt-1";
 
   return (
-    <Form {...(form as any)}>
+    <Form {...(form as any)} className="h-[100%]">
       <form
         id="property-form"
         onSubmit={form.handleSubmit(onSubmit as any)}
-        className="flex flex-col gap-8"
+        className="flex flex-col gap-2 h-full"
       >
         {/* ── Reusable Custom Stepper ── */}
         <Stepper
@@ -190,6 +235,7 @@ export function PropertyForm({
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             const isCompleted = currentStep > index;
+            // Check if ANY field in this specific step has an error
             const hasError = step.fields.some((f) => {
               const [domain, field] = f.split(".");
               return !!(errors as any)[domain]?.[field];
@@ -198,7 +244,9 @@ export function PropertyForm({
             return (
               <StepperItem key={step.id} step={index} hasError={hasError}>
                 <StepperIndicator>
-                  {isCompleted ? (
+                  {hasError ? (
+                    <AlertTriangle className="h-4 w-4" />
+                  ) : isCompleted ? (
                     <Check className="h-4 w-4" />
                   ) : (
                     <Icon className="h-4 w-4" />
@@ -210,10 +258,10 @@ export function PropertyForm({
           })}
         </Stepper>
 
-        {/* ── Form Fields ── */}
-        <div className="space-y-5 min-h-[320px]">
-          {/* Step 0: Basics */}
-          {currentStep === 0 && (
+        {/* ── Form Fields (scrollable) ── */}
+        <div className="space-y-5 min-h-0 flex-1 overflow-y-auto mt-6">
+          {/* Step 0: Basic Info (Title, Price, Location, Type, Status) */}
+          {STEPS[currentStep]?.id === "basicInfo" && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <FormField
                 control={form.control}
@@ -252,7 +300,11 @@ export function PropertyForm({
                           placeholder="0"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber || 0)
+                            field.onChange(
+                              e.target.value === ""
+                                ? 0
+                                : Number(e.target.value),
+                            )
                           }
                         />
                       </FormControl>
@@ -281,86 +333,6 @@ export function PropertyForm({
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="specifications.bedrooms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-foreground">
-                        {t("properties.fields.bedrooms")}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className={inputBaseClasses}
-                          min={0}
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber || 0)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage className={errorClasses} />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="specifications.bathrooms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-foreground">
-                        {t("properties.fields.bathrooms")}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className={inputBaseClasses}
-                          min={0}
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber || 0)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage className={errorClasses} />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="specifications.area"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-foreground">
-                        {t("properties.fields.area")} (sqft)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className={inputBaseClasses}
-                          min={0}
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber || 0)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage className={errorClasses} />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 1: Details */}
-          {currentStep === 1 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -433,6 +405,98 @@ export function PropertyForm({
                   )}
                 />
               </div>
+            </div>
+          )}
+
+          {/* Step 1: Specifications (Beds, Baths, Area, Furnished) */}
+          {STEPS[currentStep]?.id === "specifications" && (
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="specifications.bedrooms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground">
+                        {t("properties.fields.bedrooms")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className={inputBaseClasses}
+                          min={0}
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? 0
+                                : Number(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="specifications.bathrooms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground">
+                        {t("properties.fields.bathrooms")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className={inputBaseClasses}
+                          min={0}
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? 0
+                                : Number(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="specifications.area"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground">
+                        {t("properties.fields.area")} (sqft)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className={inputBaseClasses}
+                          min={0}
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? 0
+                                : Number(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
@@ -452,31 +516,136 @@ export function PropertyForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="publishing.description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground">
-                      {t("properties.fields.description")}
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe the property..."
-                        className="min-h-[120px] resize-none rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className={errorClasses} />
-                  </FormItem>
-                )}
-              />
             </div>
           )}
 
-          {/* Step 2: Publishing */}
-          {currentStep === 2 && (
+          {/* Step 2: Media (Upload & URLs) */}
+          {STEPS[currentStep]?.id === "media" && <PropertyMedia />}
+
+          {/* UAE / Off-Plan Step */}
+          {STEPS[currentStep]?.id === "uae" && (
+            <TooltipProvider delayDuration={200}>
+              <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                <FormField
+                  control={form.control}
+                  name="uae.handover_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-1.5">
+                        <FormLabel className="text-foreground">
+                          {t("properties.fields.handover_date")}
+                        </FormLabel>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            {t("properties.hints.handover_date")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          className={inputBaseClasses}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="uae.rera_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-1.5">
+                        <FormLabel className="text-foreground">
+                          {t("properties.fields.rera_id")}
+                        </FormLabel>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            {t("properties.hints.rera_id")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. 12345"
+                          className={inputBaseClasses}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="uae.roi_estimate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-1.5">
+                        <FormLabel className="text-foreground">
+                          {t("properties.fields.roi_estimate")}
+                        </FormLabel>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">
+                            {t("properties.hints.roi_estimate")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="e.g. 7.5"
+                          className={inputBaseClasses}
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(e.target.valueAsNumber || undefined)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="uae.payment_plan"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground">
+                        {t("properties.fields.payment_plan")}
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={t("properties.hints.payment_plan")}
+                          className="min-h-[100px] resize-none rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className={errorClasses} />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </TooltipProvider>
+          )}
+
+          {/* Publishing Step */}
+          {STEPS[currentStep]?.id === "publishing" && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <FormField
                 control={form.control}
@@ -498,6 +667,26 @@ export function PropertyForm({
                         className="cursor-pointer data-[state=checked]:bg-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0"
                       />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="publishing.description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-foreground">
+                      {t("properties.fields.description")}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe the property..."
+                        className="min-h-[120px] resize-none rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className={errorClasses} />
                   </FormItem>
                 )}
               />
@@ -526,8 +715,7 @@ export function PropertyForm({
         </div>
 
         {/* ── Action Footer ── */}
-        <div className="flex items-center justify-between pt-5 border-t border-border/50">
-          {/* Left Side: Navigation Arrows */}
+        <div className="flex items-center justify-between pt-5 border-t border-border/50 mt-auto">
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -551,7 +739,6 @@ export function PropertyForm({
             </Button>
           </div>
 
-          {/* Right Side: Actions */}
           <div className="flex items-center gap-3">
             <Button
               type="button"

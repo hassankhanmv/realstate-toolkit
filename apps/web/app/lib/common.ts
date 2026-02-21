@@ -32,8 +32,7 @@ export const initializeGlobalApp = (store: Store) => {
     window.App = {
       store,
       validation,
-      translateStatic: (key: string, options?: any) =>
-        i18next.t(key, options) as string,
+      translateStatic,
       actions: {
         setLoading: (isLoading: boolean) =>
           store.dispatch(setLoading(isLoading)),
@@ -51,3 +50,5 @@ export const initializeGlobalApp = (store: Store) => {
     };
   }
 };
+export const translateStatic = (key: string, options?: any) =>
+  i18next.t(key, options) as string;

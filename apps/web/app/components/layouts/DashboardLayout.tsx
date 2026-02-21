@@ -4,6 +4,7 @@ import { Sidebar } from "../dashboard/Sidebar";
 import { Header } from "../dashboard/Header";
 import { MobileBottomNav } from "../dashboard/MobileBottomNav";
 import { MobileNavDrawer } from "../dashboard/MobileNavDrawer";
+import { localStorageManager } from "@/lib/localStorageManager";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -15,12 +16,34 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("sidebar-collapsed");
-      if (saved !== null) {
-        setSidebarCollapsed(saved === "true");
+    if (typeof window === "undefined") return;
+
+    // Create a media query to trigger only when crossing the 1024px breakpoint
+    const mediaQuery = window.matchMedia("(max-width: 1024px)");
+
+    const handleMediaQueryChange = (
+      e: MediaQueryListEvent | MediaQueryList,
+    ) => {
+      if (e.matches) {
+        // Less than 1024px: auto-collapse
+        setSidebarCollapsed(true);
+      } else {
+        // Greater than 1024px: restore saved preference or default to false
+        const currentSaved = localStorageManager.getItem<boolean | null>(
+          "sidebar-collapsed",
+          null,
+        );
+        setSidebarCollapsed(currentSaved !== null ? currentSaved : false);
       }
-    }
+    };
+
+    // Initial check on mount
+    handleMediaQueryChange(mediaQuery);
+
+    // Listen for changes
+    mediaQuery.addEventListener("change", handleMediaQueryChange);
+    return () =>
+      mediaQuery.removeEventListener("change", handleMediaQueryChange);
   }, []);
 
   useEffect(() => {
@@ -29,6 +52,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleSidebarChange = useCallback((collapsed: boolean) => {
     setSidebarCollapsed(collapsed);
+    localStorageManager.setItem("sidebar-collapsed", collapsed);
   }, []);
 
   const handleMobileMenuOpen = useCallback(() => {

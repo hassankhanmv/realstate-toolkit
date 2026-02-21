@@ -1,6 +1,6 @@
 import type { Route } from "./+types/dashboard";
 import { getSupabaseServer } from "@/lib/supabase.server";
-import { data } from "react-router";
+import { data, useNavigation } from "react-router";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { Tile } from "@/components/dashboard/Tile";
 import {
@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { setUser } from "~/store/slices/authSlice";
+import { setLoading, setUser } from "~/store/slices/authSlice";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo } from "react";
@@ -48,13 +48,18 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
   // Set user in redux store (in useEffect to avoid setting state during render)
   useEffect(() => {
     if (user) {
       dispatch(setUser(user));
     }
   }, [user, dispatch]);
+
+  useEffect(() => {
+    dispatch(setLoading(isLoading));
+  }, [isLoading, dispatch]);
 
   // Memoize stats array - only recompute when language changes
   const stats = useMemo(

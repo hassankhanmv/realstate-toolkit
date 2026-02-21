@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import type { Route } from "./+types/$id";
-import { data, Link, useFetcher, useNavigate } from "react-router"; // Added useNavigate
+import {
+  data,
+  Link,
+  useFetcher,
+  useNavigate,
+  useNavigation,
+  useRevalidator,
+} from "react-router";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getSupabaseServer } from "@/lib/supabase.server";
-import { type Property } from "@repo/supabase";
+import { type Property, getLeadsByProperty, type Lead } from "@repo/supabase";
 import {
   propertySchema,
   type PropertyFormValues,
@@ -17,6 +24,18 @@ import { PropertyPublishing } from "~/components/properties/PropertyPublishing";
 import { DashboardLayout } from "~/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  NameCell,
+  ContactCell,
+  StatusBadgeCell,
+  DateCell,
+} from "@/components/global/table/CellRenderers";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,10 +46,22 @@ import {
   Globe,
   Home,
   Settings2,
+  Users,
+  RefreshCw,
+  Plus,
+  MessageCircle,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { useAppDispatch } from "~/store/hooks";
 import { setLoading, addToast } from "~/store/slices/uiSlice";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  GlobalDataTable,
+  type HeaderConfig,
+} from "~/components/global/table/GlobalDataTable";
+import type { ContextMenuOption } from "~/components/global/table/ContextMenu";
+import { LeadForm } from "@/components/dashboard/leads/LeadForm";
 
 // ── Loader ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +86,9 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     throw data({ error: "Property not found" }, { status: 404, headers });
   }
 
+  // Fetch leads for this property
+  const leads = await getLeadsByProperty(supabase, property.id);
+
   // Map the flat DB data to our scalable, nested Zod structure
   const formData: PropertyFormValues = {
     basicInfo: {
@@ -75,9 +109,13 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
       is_published: property.is_published,
       notes: property.notes ?? "",
     },
+    media: {
+      urls: [],
+      media_urls: property.images ?? [],
+    },
   };
 
-  return data({ property, formData }, { headers });
+  return data({ property, formData, leads: leads as any[] }, { headers });
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -100,13 +138,25 @@ function getStatusStyles(status: string) {
 export default function PropertyDetailPage({
   loaderData,
 }: Route.ComponentProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate(); // For redirecting after delete
-  const { property, formData } = loaderData;
+  const revalidator = useRevalidator();
+  const { property, formData, leads } = loaderData as any;
+
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
+
+  useEffect(() => {
+    dispatch(setLoading(isLoading));
+  }, [isLoading, dispatch]);
 
   const [activeSection, setActiveSection] = useState("basic-info");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Delete dialog state
+
+  // Leads state
+  const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | undefined>();
 
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema) as any,
@@ -131,9 +181,16 @@ export default function PropertyDetailPage({
       });
 
       if (!res.ok) throw new Error("Update failed");
-      dispatch(addToast({ message: t("properties.success.updated"), type: "success" }));
+      dispatch(
+        addToast({ message: t("properties.success.updated"), type: "success" }),
+      );
     } catch (err) {
-      dispatch(addToast({ message: t("properties.errors.update_failed"), type: "error" }));
+      dispatch(
+        addToast({
+          message: t("properties.errors.update_failed"),
+          type: "error",
+        }),
+      );
     } finally {
       dispatch(setLoading(false));
     }
@@ -147,12 +204,19 @@ export default function PropertyDetailPage({
       });
 
       if (!res.ok) throw new Error("Delete failed");
-      
-      dispatch(addToast({ message: t("properties.success.deleted"), type: "success" }));
+
+      dispatch(
+        addToast({ message: t("properties.success.deleted"), type: "success" }),
+      );
       // Redirect back to the properties table
       navigate("/dashboard/properties");
     } catch (err) {
-      dispatch(addToast({ message: t("properties.errors.delete_failed"), type: "error" }));
+      dispatch(
+        addToast({
+          message: t("properties.errors.delete_failed"),
+          type: "error",
+        }),
+      );
     } finally {
       dispatch(setLoading(false));
       setIsDeleteDialogOpen(false);
@@ -165,14 +229,134 @@ export default function PropertyDetailPage({
     window.open(`/listing/${property.id}`, "_blank");
   };
 
+  const handleOpenLeadForm = (lead?: Lead) => {
+    setSelectedLead(lead);
+    setIsLeadFormOpen(true);
+  };
+
+  const leadsColumns: HeaderConfig<any>[] = useMemo(
+    () => [
+      {
+        accessorKey: "name",
+        text: t("leads.fields.name", "Name"),
+        sortable: true,
+        cell: (row) => <NameCell name={row.name} />,
+      },
+      {
+        type: "action",
+        text: "",
+        align: "end",
+        menuSide: "bottom",
+        menuAlign: "end",
+      },
+      {
+        accessorKey: "status",
+        text: t("leads.fields.status", "Status"),
+        sortable: true,
+        cell: (row) => (
+          <StatusBadgeCell
+            status={row.status || "New"}
+            label={
+              t(
+                `leads.status.${row.status || "New"}`,
+                row.status || "New",
+              ) as string
+            }
+          />
+        ),
+        filter: {
+          type: "select",
+          dataType: [
+            { label: t("leads.status.New", "New"), value: "New" },
+            {
+              label: t("leads.status.Contacted", "Contacted"),
+              value: "Contacted",
+            },
+            { label: t("leads.status.Viewing", "Viewing"), value: "Viewing" },
+            {
+              label: t("leads.status.Negotiation", "Negotiation"),
+              value: "Negotiation",
+            },
+            { label: t("leads.status.Won", "Won"), value: "Won" },
+            { label: t("leads.status.Lost", "Lost"), value: "Lost" },
+          ],
+        },
+      },
+      {
+        accessorKey: "phone",
+        text: t("leads.fields.phone", "Contact"),
+        cell: (row) => <ContactCell phone={row.phone} email={row.email} />,
+      },
+      {
+        accessorKey: "created_at",
+        text: t("leads.fields.created_at", "Date"),
+        sortable: true,
+        cell: (row) => (
+          <DateCell
+            date={row.created_at}
+            locale={i18n.language === "ar" ? "ar-AE" : "en-US"}
+          />
+        ),
+      },
+    ],
+    [t, i18n],
+  );
+
+  const getActionOptions = useCallback(
+    (row: any): ContextMenuOption[] => [
+      {
+        id: 1,
+        title: "properties.edit",
+        icon: <Eye className="h-4 w-4" />,
+        onClick: () => handleOpenLeadForm(row),
+      },
+      {
+        id: 2,
+        title: "leads.actions.whatsapp",
+        icon: <MessageCircle className="h-4 w-4" />,
+        onClick: () =>
+          row.phone && window.open(`https://wa.me/${row.phone}`, "_blank"),
+        disabled: !row.phone,
+      },
+      {
+        id: 3,
+        title: "leads.actions.call",
+        icon: <Phone className="h-4 w-4" />,
+        onClick: () => row.phone && window.open(`tel:${row.phone}`, "_self"),
+        disabled: !row.phone,
+      },
+      {
+        id: 4,
+        title: "leads.actions.email",
+        icon: <Mail className="h-4 w-4" />,
+        onClick: () => row.email && window.open(`mailto:${row.email}`, "_self"),
+        disabled: !row.email,
+      },
+    ],
+    [],
+  );
+
+  const massContextMenu: ContextMenuOption[] = [
+    {
+      id: 1,
+      title: "common.table.refresh",
+      icon: <RefreshCw className="h-4 w-4" />,
+      onClick: () => revalidator.revalidate(),
+    },
+    {
+      id: 2,
+      title: "common.table.add_new",
+      icon: <Plus className="h-4 w-4" />,
+      onClick: () => handleOpenLeadForm(),
+    },
+  ];
+
   // Sidebar navigation sections
   const sections = [
     { id: "basic-info", label: t("properties.basics"), icon: Home },
     { id: "specifications", label: t("properties.details"), icon: Settings2 },
     { id: "publishing", label: t("properties.publishing"), icon: Globe },
-    // Ready for scale:
-    // { id: "media", label: t("properties.media"), icon: Image },
-    // { id: "financials", label: t("properties.financials"), icon: DollarSign },
+    { id: "leads", label: t("leads.title", "Leads"), icon: Users },
   ];
 
   return (
@@ -307,6 +491,23 @@ export default function PropertyDetailPage({
                 </CardContent>
               </Card>
 
+              {/* Section 4: Leads */}
+              <Card id="leads" className="scroll-mt-32 border-border shadow-sm">
+                <CardContent className="p-6">
+                  <GlobalDataTable
+                    headers={leadsColumns}
+                    data={leads}
+                    title={t("leads.title")}
+                    search={true}
+                    contextMenuOptions={getActionOptions}
+                    massContextMenu={massContextMenu}
+                    noDataIcon={Users}
+                    noDataMessage="leads.no_leads"
+                    noDataDesc="leads.no_leads_desc"
+                  />
+                </CardContent>
+              </Card>
+
               {/* Danger Zone */}
               <Card className="border-destructive/30 shadow-sm mt-8">
                 <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
@@ -342,6 +543,16 @@ export default function PropertyDetailPage({
         description={t("properties.delete_confirm_desc")}
         confirmText={t("properties.delete")}
         variant="destructive"
+      />
+
+      <LeadForm
+        open={isLeadFormOpen}
+        onOpenChange={(open) => {
+          setIsLeadFormOpen(open);
+          if (!open) setSelectedLead(undefined);
+        }}
+        lead={selectedLead}
+        defaultPropertyId={property.id}
       />
     </DashboardLayout>
   );

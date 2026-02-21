@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useMemo, useCallback, memo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
   flexRender,
@@ -10,6 +10,8 @@ import {
   type SortingState,
   type ColumnDef,
 } from "@tanstack/react-table";
+import { useDebounce } from "@/hooks/useDebounce";
+import { DataTableFilter, type FilterConfig } from "./DataTableFilter";
 import {
   Table,
   TableBody,
@@ -34,6 +36,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ContextMenu, type ContextMenuOption } from "./ContextMenu";
 import { DataTableToolbar } from "./DataTableToolbar";
+import type { ColumnFiltersState } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
@@ -50,6 +53,7 @@ export interface HeaderConfig<T = any> {
   cell?: (row: T) => ReactNode;
   tooltip?: string;
   sortable?: boolean;
+  filter?: FilterConfig;
   width?: string | number;
   align?: "start" | "center" | "end";
   type?: "default" | "action";
@@ -71,6 +75,7 @@ interface GlobalDataTableProps<T> {
   noDataIcon?: React.ElementType;
   noDataMessage?: string;
   noDataDesc?: string;
+  noDataAction?: React.ReactNode;
 }
 
 export function GlobalDataTable<T extends { id?: string | number }>({
@@ -87,121 +92,179 @@ export function GlobalDataTable<T extends { id?: string | number }>({
   noDataIcon: NoDataIcon,
   noDataMessage = "common.table.no_data",
   noDataDesc = "common.table.no_data_desc",
+  noDataAction,
 }: GlobalDataTableProps<T>) {
   const { t } = useTranslation();
   const [internalSearch, setInternalSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
   const searchValue = searchVal !== undefined ? searchVal : internalSearch;
+  const debouncedFilter = useDebounce(searchValue, 300);
 
   const handleSearchChange = (val: string) => {
     if (onSearchChange) onSearchChange(val);
     else setInternalSearch(val);
   };
 
-  const baseColumns: ColumnDef<T>[] = headers.map((header) => {
-    const isAction = header.type === "action";
-    return {
-      id: isAction ? "actions" : header.accessorKey || header.text,
-      accessorKey: header.accessorKey,
-      header: ({ column }) => {
-        let HeaderContent = (
-          <div
-            className={`flex items-center gap-1 ${
-              header.align === "end"
-                ? "justify-end"
-                : header.align === "center"
-                  ? "justify-center"
-                  : "justify-start"
-            }`}
-            style={{ width: header.width }}
-          >
-            {t(header.text)}
-          </div>
-        );
+  // Memoize columns so cell renderers (images, tooltips) don't re-mount on every search keystroke
+  const baseColumns = useMemo<ColumnDef<T>[]>(
+    () =>
+      headers.map((header) => {
+        const isAction = header.type === "action";
+        return {
+          id: isAction ? "actions" : header.accessorKey || header.text,
+          accessorKey: header.accessorKey,
+          filterFn: header.filter
+            ? (row: any, columnId: string, filterValue: any) => {
+                const value = row.getValue(columnId);
+                if (filterValue === undefined || filterValue === null)
+                  return true;
 
-        if (header.sortable) {
-          const isSorted = column.getIsSorted();
-          HeaderContent = (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(isSorted === "asc")}
-              className={`-ml-4 h-8 px-4 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition-colors ${
-                header.align === "end"
-                  ? "w-full justify-end"
-                  : header.align === "center"
-                    ? "w-full justify-center"
-                    : "justify-start"
-              }`}
-            >
-              <span>{t(header.text)}</span>
-              {isSorted === "asc" ? (
-                <ArrowUp className="ml-1.5 h-3.5 w-3.5" />
-              ) : isSorted === "desc" ? (
-                <ArrowDown className="ml-1.5 h-3.5 w-3.5" />
-              ) : (
-                <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 placeholder:opacity-50" />
-              )}
-            </Button>
-          );
-        }
+                // Select filter: exact match (handle booleans stored as "true"/"false")
+                if (header.filter!.type === "select") {
+                  if (typeof value === "boolean") {
+                    return String(value) === String(filterValue);
+                  }
+                  return String(value) === String(filterValue);
+                }
 
-        if (header.tooltip) {
-          return (
-            <Tooltip delayDuration={200}>
-              <TooltipTrigger asChild>
-                <div className="cursor-help w-max">{HeaderContent}</div>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="text-xs bg-primary text-primary-foreground z-50 px-2 py-1 shadow-md"
-              >
-                <p>{t(header.tooltip)}</p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        }
-        return HeaderContent;
-      },
-      cell: ({ row }) => {
-        if (isAction && contextMenuOptions) {
-          const options = contextMenuOptions(row.original);
-          return (
-            <div
-              className={
-                header.align === "end"
-                  ? "flex justify-end"
-                  : header.align === "center"
-                    ? "flex justify-center"
-                    : "flex justify-start"
+                // Number field: greater than or equal
+                if (header.filter!.dataType === "number") {
+                  return Number(value) >= Number(filterValue);
+                }
+
+                // String field: contains
+                return String(value)
+                  .toLowerCase()
+                  .includes(String(filterValue).toLowerCase());
               }
-            >
-              <ContextMenu
-                options={options}
-                side={header.menuSide}
-                align={header.menuAlign}
-              />
-            </div>
-          );
-        }
-        if (header.cell) return header.cell(row.original);
+            : undefined,
+          header: ({ column }) => {
+            let HeaderContent = (
+              <div
+                className={`flex items-center gap-1 truncate ${
+                  header.align === "end"
+                    ? "justify-end"
+                    : header.align === "center"
+                      ? "justify-center"
+                      : "justify-start"
+                }`}
+                style={{ width: header.width }}
+              >
+                <span className="truncate">{t(header.text)}</span>
+              </div>
+            );
 
-        const val = row.getValue(header.accessorKey as string);
-        return (
-          <div
-            className={
-              header.align === "end"
-                ? "text-end"
-                : header.align === "center"
-                  ? "text-center"
-                  : "text-start"
+            if (header.sortable) {
+              const isSorted = column.getIsSorted();
+              HeaderContent = (
+                <Button
+                  variant="ghost"
+                  onClick={() => column.toggleSorting(isSorted === "asc")}
+                  className={`-ml-4 h-8 px-4 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition-colors ${
+                    header.align === "end"
+                      ? "w-full justify-end"
+                      : header.align === "center"
+                        ? "w-full justify-center"
+                        : "justify-start"
+                  }`}
+                >
+                  <span className="truncate">{t(header.text)}</span>
+                  {isSorted === "asc" ? (
+                    <ArrowUp className="ml-1.5 h-3.5 w-3.5" />
+                  ) : isSorted === "desc" ? (
+                    <ArrowDown className="ml-1.5 h-3.5 w-3.5" />
+                  ) : (
+                    <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 placeholder:opacity-50" />
+                  )}
+                </Button>
+              );
             }
-          >
-            {val as ReactNode}
-          </div>
-        );
-      },
-    } as ColumnDef<T>;
-  });
+
+            // Wrap with filter icon if filter config exists
+            if (header.filter && header.accessorKey) {
+              return (
+                <div className="flex items-center">
+                  {header.tooltip ? (
+                    <Tooltip delayDuration={200}>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help w-max">{HeaderContent}</div>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="text-xs bg-primary text-primary-foreground z-50 px-2 py-1 shadow-md"
+                      >
+                        <p>{t(header.tooltip)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    HeaderContent
+                  )}
+                  <DataTableFilter column={column} filter={header.filter} />
+                </div>
+              );
+            }
+
+            if (header.tooltip) {
+              return (
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help w-max">{HeaderContent}</div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="text-xs bg-primary text-primary-foreground z-50 px-2 py-1 shadow-md"
+                  >
+                    <p>{t(header.tooltip)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+            return HeaderContent;
+          },
+          cell: ({ row }) => {
+            if (isAction && contextMenuOptions) {
+              const options = contextMenuOptions(row.original);
+              return (
+                <div
+                  className={
+                    header.align === "end"
+                      ? "flex justify-end"
+                      : header.align === "center"
+                        ? "flex justify-center"
+                        : "flex justify-start"
+                  }
+                >
+                  <ContextMenu
+                    options={options}
+                    side={header.menuSide}
+                    align={header.menuAlign}
+                  />
+                </div>
+              );
+            }
+            if (header.cell) return header.cell(row.original);
+
+            const val = row.getValue(header.accessorKey as string);
+            return (
+              <div
+                className={
+                  header.align === "end"
+                    ? "text-end"
+                    : header.align === "center"
+                      ? "text-center"
+                      : "text-start"
+                }
+              >
+                {val as ReactNode}
+              </div>
+            );
+          },
+        } as ColumnDef<T>;
+      }),
+    [headers, t, contextMenuOptions],
+  );
 
   const table = useReactTable({
     data,
@@ -211,10 +274,28 @@ export function GlobalDataTable<T extends { id?: string | number }>({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     initialState: { pagination: { pageSize: limit } },
-    state: { globalFilter: searchValue, sorting },
+    state: { globalFilter: debouncedFilter, sorting, columnFilters },
     onGlobalFilterChange: handleSearchChange,
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
   });
+
+  // Memoized row component to prevent full table re-renders
+  const MemoizedTableRow = useMemo(
+    () =>
+      memo(function MemoRow({ row }: { row: any }) {
+        return (
+          <TableRow className="transition-colors hover:bg-muted/40 border-b-border/40">
+            {row.getVisibleCells().map((cell: any) => (
+              <TableCell key={cell.id} className="py-4 px-4 text-[13px]">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        );
+      }),
+    [],
+  );
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -241,7 +322,7 @@ export function GlobalDataTable<T extends { id?: string | number }>({
                     {hg.headers.map((header) => (
                       <TableHead
                         key={header.id}
-                        className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground h-11 px-4"
+                        className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground h-12 px-4"
                       >
                         {header.isPlaceholder
                           ? null
@@ -256,24 +337,11 @@ export function GlobalDataTable<T extends { id?: string | number }>({
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      className="transition-colors hover:bg-muted/40 border-b-border/40"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className="py-3.5 px-4 text-sm"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                  table
+                    .getRowModel()
+                    .rows.map((row) => (
+                      <MemoizedTableRow key={row.id} row={row} />
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell
@@ -288,7 +356,12 @@ export function GlobalDataTable<T extends { id?: string | number }>({
                           {t(noDataMessage)}
                         </p>
                         {noDataDesc && (
-                          <p className="text-xs">{t(noDataDesc)}</p>
+                          <p className="text-xs mb-4">{t(noDataDesc)}</p>
+                        )}
+                        {noDataAction && (
+                          <div className="mt-2 text-foreground font-medium flex items-center justify-center">
+                            {noDataAction}
+                          </div>
                         )}
                       </div>
                     </TableCell>

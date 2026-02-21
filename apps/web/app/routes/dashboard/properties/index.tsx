@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Route } from "./+types/index";
-import { data, useNavigate, useRevalidator } from "react-router";
+import { data, useNavigate, useNavigation, useRevalidator } from "react-router";
 import { useTranslation } from "react-i18next";
 import { getSupabaseServer } from "@/lib/supabase.server";
 import { getPropertiesByBroker, type Property } from "@repo/supabase";
@@ -22,10 +22,25 @@ import {
   RefreshCw,
   Loader2,
   Maximize2,
+  Minimize2,
   Eye,
   ExternalLink,
+  Users,
+  Sparkles,
 } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import {
+  formatNumber,
+  truncateText,
+  formatDateShort,
+  formatDateLong,
+  formatTimeAgo,
+} from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +68,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
   if (!user) {
     return data(
-      { error: "Unauthorized", properties: [] as Property[] },
+      { error: "Unauthorized", properties: [] as Property[], user: null },
       { status: 401, headers },
     );
   }
@@ -111,6 +126,16 @@ function toFormValues(p: Property): PropertyFormValues {
       is_published: p.is_published,
       notes: p.notes ?? "",
     },
+    media: {
+      urls: [],
+      media_urls: p.images ?? [],
+    },
+    uae: {
+      handover_date: p.handover_date ?? undefined,
+      payment_plan: p.payment_plan ?? undefined,
+      rera_id: p.rera_id ?? undefined,
+      roi_estimate: p.roi_estimate ?? undefined,
+    },
   };
 }
 
@@ -152,17 +177,24 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
   if (!loaderData) {
     return null;
   }
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
   const { properties, user } = loaderData;
   const revalidator = useRevalidator();
   const navigate = useNavigate();
 
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
+
+  useEffect(() => {
+    dispatch(setLoading(isLoading));
+  }, [isLoading, dispatch]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const totalProperties = properties.length;
@@ -188,17 +220,28 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
     setIsDialogOpen(true);
   }
 
+  // Update your closeDialog function:
   function closeDialog() {
     setIsDialogOpen(false);
     setSelectedProperty(null);
+    setIsMaximized(false); // Reset size on close
   }
 
   const handleCreate = async (values: PropertyFormValues) => {
     setIsSubmitting(true);
+    const images = [
+      ...(values.media?.media_urls ?? []),
+      ...(values.media?.urls ?? []),
+    ];
     const flatData = {
       ...values.basicInfo,
       ...values.specifications,
       ...values.publishing,
+      images,
+      handover_date: values.uae?.handover_date || null,
+      payment_plan: values.uae?.payment_plan || null,
+      rera_id: values.uae?.rera_id || null,
+      roi_estimate: values.uae?.roi_estimate ?? null,
     };
     try {
       const res = await fetch("/api/properties", {
@@ -225,10 +268,19 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
   const handleUpdate = async (values: PropertyFormValues) => {
     if (!selectedProperty) return;
     setIsSubmitting(true);
+    const images = [
+      ...(values.media?.media_urls ?? []),
+      ...(values.media?.urls ?? []),
+    ];
     const flatData = {
       ...values.basicInfo,
       ...values.specifications,
       ...values.publishing,
+      images,
+      handover_date: values.uae?.handover_date || null,
+      payment_plan: values.uae?.payment_plan || null,
+      rera_id: values.uae?.rera_id || null,
+      roi_estimate: values.uae?.roi_estimate ?? null,
     };
     try {
       const res = await fetch(`/api/properties/${selectedProperty.id}`, {
@@ -279,20 +331,47 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
+  const locale = i18n.language === "ar" ? "ar-SA" : "en-US";
+
   const headers: HeaderConfig<Property>[] = [
     {
       accessorKey: "title",
       text: "properties.fields.title",
       sortable: true,
       cell: (row) => (
-        <span className="font-semibold text-foreground">{row.title}</span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2.5 min-w-0">
+                {row.images?.[0] ? (
+                  <img
+                    src={row.images[0]}
+                    alt=""
+                    className="h-8 w-8 rounded-md object-cover shrink-0 border border-border"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : null}
+                <span className="text-xs text-foreground truncate">
+                  {truncateText(row.title, 30)}
+                </span>
+              </div>
+            </TooltipTrigger>
+            {row.title.length > 30 && (
+              <TooltipContent side="bottom">
+                <p className="text-xs max-w-[280px]">{row.title}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       ),
     },
     {
       type: "action",
       text: "",
-      align: "end", // Logical RTL support
-      menuSide: "bottom", // Pass exact position to context menu
+      align: "end",
+      menuSide: "bottom",
       menuAlign: "end",
     },
     {
@@ -300,15 +379,39 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
       text: "properties.fields.location",
       sortable: true,
       cell: (row) => (
-        <span className="text-muted-foreground">{row.location}</span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground truncate block max-w-[140px]">
+                {truncateText(row.location, 20)}
+              </span>
+            </TooltipTrigger>
+            {row.location.length > 20 && (
+              <TooltipContent side="bottom">
+                <p className="text-xs">{row.location}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       ),
     },
     {
       accessorKey: "type",
       text: "properties.fields.type",
       sortable: true,
+      filter: {
+        dataType: [
+          { label: t("properties.types.Apartment"), value: "Apartment" },
+          { label: t("properties.types.Villa"), value: "Villa" },
+          { label: t("properties.types.Townhouse"), value: "Townhouse" },
+          { label: t("properties.types.Office"), value: "Office" },
+          { label: t("properties.types.Plot"), value: "Plot" },
+          { label: t("properties.types.Commercial"), value: "Commercial" },
+        ],
+        type: "select",
+      },
       cell: (row) => (
-        <span className="font-medium text-foreground">
+        <span className="text-xs text-foreground">
           {t(`properties.types.${row.type}`)}
         </span>
       ),
@@ -317,8 +420,12 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
       accessorKey: "price",
       text: "properties.fields.price",
       sortable: true,
+      filter: {
+        dataType: "number",
+        type: "field",
+      },
       cell: (row) => (
-        <span className="font-medium tabular-nums text-foreground">
+        <span className="text-xs tabular-nums text-foreground">
           AED {formatNumber(row.price)}
         </span>
       ),
@@ -327,10 +434,19 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
       accessorKey: "status",
       text: "properties.fields.status",
       sortable: true,
+      filter: {
+        dataType: [
+          { label: t("properties.statuses.For Sale"), value: "For Sale" },
+          { label: t("properties.statuses.For Rent"), value: "For Rent" },
+          { label: t("properties.statuses.Off-Plan"), value: "Off-Plan" },
+          { label: t("properties.statuses.Ready"), value: "Ready" },
+        ],
+        type: "select",
+      },
       cell: (row) => (
         <Badge
           variant="outline"
-          className={`px-2.5 py-0.5 text-xs font-semibold ${getStatusStyles(row.status)}`}
+          className={`text-[10px] px-2 py-0 font-medium leading-5 ${getStatusStyles(row.status)}`}
         >
           {t(`properties.statuses.${row.status}`)}
         </Badge>
@@ -340,14 +456,50 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
       accessorKey: "is_published",
       text: "properties.fields.is_published",
       sortable: true,
-      tooltip: "properties.published_tooltip",
+      filter: {
+        dataType: [
+          { label: t("properties.published"), value: "true" },
+          { label: t("properties.draft"), value: "false" },
+        ],
+        type: "select",
+      },
       cell: (row) => (
         <Badge
-          variant={row.is_published ? "default" : "secondary"}
-          className="px-2.5 py-0.5 text-xs font-semibold"
+          variant="outline"
+          className={`text-[10px] px-2 py-0 font-medium leading-5 gap-1.5 ${
+            row.is_published
+              ? "border-green-500/40 text-green-600 bg-green-500/5"
+              : "border-amber-500/40 text-amber-600 bg-amber-500/5"
+          }`}
         >
+          <div
+            className={`h-1.5 w-1.5 rounded-full ${
+              row.is_published ? "bg-green-500" : "bg-amber-500"
+            }`}
+          />
           {row.is_published ? t("properties.published") : t("properties.draft")}
         </Badge>
+      ),
+    },
+    {
+      accessorKey: "created_at",
+      text: "properties.fields.created_at",
+      sortable: true,
+      cell: (row) => (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {formatTimeAgo(row.created_at, locale)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p className="text-xs">
+                {formatDateLong(row.created_at, locale)}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       ),
     },
   ];
@@ -373,6 +525,22 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
     },
     {
       id: 4,
+      title: "properties.view_leads",
+      icon: <Users className="h-4 w-4" />,
+      onClick: () => {
+        navigate(`/dashboard/leads?propertyId=${property.id}`);
+      },
+    },
+    {
+      id: 5,
+      title: "properties.ai_description",
+      icon: <Sparkles className="h-4 w-4" />,
+      onClick: () => {
+        toast.info(t("properties.coming_soon"));
+      },
+    },
+    {
+      id: 6,
       title: "properties.delete",
       icon: <Trash2 className="h-4 w-4" />,
       destructive: true,
@@ -419,99 +587,125 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Clean, Non-inline Stats Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-2">
-          <StatCard
-            title={t("dashboard.stats.total_properties")}
-            value={totalProperties}
-            icon={Building2}
-          />
-          <StatCard
-            title={t("properties.published")}
-            value={publishedProperties}
-            icon={CheckCircle2}
-          />
-          <StatCard
-            title={t("properties.draft")}
-            value={draftProperties}
-            icon={FileText}
+      <>
+        <div className="space-y-8">
+          {/* Clean, Non-inline Stats Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-2">
+            <StatCard
+              title={t("dashboard.stats.total_properties")}
+              value={totalProperties}
+              icon={Building2}
+            />
+            <StatCard
+              title={t("properties.published")}
+              value={publishedProperties}
+              icon={CheckCircle2}
+            />
+            <StatCard
+              title={t("properties.draft")}
+              value={draftProperties}
+              icon={FileText}
+            />
+          </div>
+
+          <GlobalDataTable
+            headers={headers}
+            data={properties}
+            title={t("properties.title")}
+            description={t("properties.subtitle")}
+            search={true}
+            contextMenuOptions={contextMenuOptions}
+            massContextMenu={massContextMenu}
+            noDataIcon={Building2}
+            noDataMessage="properties.no_properties"
+            // noDataDesc="properties.no_properties_desc"
           />
         </div>
 
-        <GlobalDataTable
-          headers={headers}
-          data={properties}
-          title={t("properties.title")}
-          description={t("properties.subtitle")}
-          search={true}
-          contextMenuOptions={contextMenuOptions}
-          massContextMenu={massContextMenu}
-          noDataIcon={Building2}
-          noDataMessage="properties.no_properties"
-          noDataDesc="properties.no_properties_desc"
-        />
-      </div>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) closeDialog();
+          }}
+        >
+          {/* Dynamic classes for width/height based on isMaximized state */}
+          <DialogContent
+            className={`p-0 bg-card border-border shadow-xl transition-all duration-300 flex flex-col ${
+              isMaximized
+                ? "w-[85vw] max-w-none h-[90vh]"
+                : "sm:max-w-[850px] max-h-[90vh]"
+            }`}
+          >
+            <div className="absolute right-12 top-3 flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMaximized(!isMaximized)}
+                className="h-6 w-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
+                title={isMaximized ? "Minimize" : "Maximize"}
+              >
+                {isMaximized ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
+                <span className="sr-only">Toggle Size</span>
+              </Button>
 
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) closeDialog();
-        }}
-      >
-        <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden bg-card border-border shadow-xl">
-          {/* Custom Expand Icon next to the default Close 'X' */}
-          {selectedProperty && (
-            <Button
-              asChild
-              variant="ghost"
-              size="icon"
-              className="absolute right-11 top-3 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              title="Open full detail page"
-            >
-              <Link to={`/dashboard/properties/${selectedProperty.id}`}>
-                <Maximize2 className="h-4 w-4" />
-                <span className="sr-only">Expand</span>
-              </Link>
-            </Button>
-          )}
-
-          <DialogHeader className="px-8 pt-8 pb-4">
-            <div className="space-y-1.5 text-start">
-              <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
-                {selectedProperty
-                  ? t("properties.edit")
-                  : t("properties.add_new")}
-              </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-sm">
-                {t("properties.subtitle")}
-              </DialogDescription>
+              {selectedProperty && (
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
+                  title="Open full detail page"
+                >
+                  <Link to={`/dashboard/properties/${selectedProperty.id}`}>
+                    <ExternalLink className="h-4 w-4" />
+                    <span className="sr-only">Open full detail page</span>
+                  </Link>
+                </Button>
+              )}
             </div>
-          </DialogHeader>
 
-          {/* Increased horizontal padding to match the wider dialog */}
-          <div className="px-8 pb-8 pt-2">
-            <PropertyForm
-              defaultValues={
-                selectedProperty ? toFormValues(selectedProperty) : undefined
-              }
-              onSubmit={selectedProperty ? handleUpdate : handleCreate}
-              isLoading={isSubmitting}
-              onCancel={closeDialog}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+            <DialogHeader className="px-8 pt-8 pb-4 shrink-0">
+              <div className="space-y-1.5 text-start">
+                <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+                  {selectedProperty
+                    ? t("properties.edit")
+                    : t("properties.add_new")}
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground text-sm">
+                  {t("properties.subtitle")}
+                </DialogDescription>
+              </div>
+            </DialogHeader>
 
-      <ConfirmDialog
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        onConfirm={confirmDelete}
-        title={t("properties.delete_confirm_title")}
-        description={t("properties.delete_confirm_desc")}
-        confirmText={t("properties.delete")}
-        variant="destructive"
-      />
+            {/* Added overflow-y-auto so the form scrolls perfectly when height is maxed */}
+            <div className="px-8 pb-8 pt-2 overflow-y-auto flex-1">
+              <PropertyForm
+                defaultValues={
+                  selectedProperty ? toFormValues(selectedProperty) : undefined
+                }
+                onSubmit={selectedProperty ? handleUpdate : handleCreate}
+                isLoading={isSubmitting}
+                onCancel={closeDialog}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <ConfirmDialog
+          isOpen={!!deleteId}
+          onClose={() => setDeleteId(null)}
+          onConfirm={confirmDelete}
+          title={t("properties.delete_confirm_title")}
+          description={t("properties.delete_confirm_desc")}
+          confirmText={t("properties.delete")}
+          variant="destructive"
+        />
+      </>
     </DashboardLayout>
   );
 }

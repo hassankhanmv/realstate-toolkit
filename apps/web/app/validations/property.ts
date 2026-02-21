@@ -21,7 +21,7 @@ export const propertySchema = z.object({
   // Domain 1: The essentials
   basicInfo: z.object({
     title: z.string().min(3, { message: "properties.errors.title_min" }),
-    price: z.number().min(0, { message: "properties.errors.invalid_price" }),
+    price: z.number().min(1, { message: "properties.errors.invalid_price" }),
     location: z
       .string()
       .min(2, { message: "properties.errors.location_required" }),
@@ -31,23 +31,36 @@ export const propertySchema = z.object({
 
   // Domain 2: The physical attributes
   specifications: z.object({
-    bedrooms: z.number().min(0),
-    bathrooms: z.number().min(0),
-    area: z.number().min(0),
+    bedrooms: z.number().min(1),
+    bathrooms: z.number().min(1),
+    area: z.number().min(1),
     furnished: z.boolean().default(false),
   }),
 
   // Domain 3: Visibility and text content
   publishing: z.object({
-    description: z.string().optional(),
+    description: z
+      .string({ message: "properties.errors.description_required" })
+      .min(1, { message: "properties.errors.description_required" }),
     is_published: z.boolean().default(true),
-    notes: z.string().optional(),
+    notes: z.string({ message: "properties.errors.notes_required" }).optional(),
   }),
 
-  // 🚀 Future Expansion Ready:
-  // media: z.object({ images: z.array(z.string()), videoTour: z.string().url().optional() }).optional(),
-  // financial: z.object({ serviceCharge: z.number(), expectedRoi: z.number() }).optional(),
-  // amenities: z.array(z.string()).optional(),
+  // Domain 4: Media
+  media: z.object({
+    urls: z.array(z.string()).default([]),
+    media_urls: z.array(z.string()).default([]),
+  }),
+
+  // Domain 5: UAE / Off-Plan details (all optional)
+  uae: z
+    .object({
+      handover_date: z.string().optional(),
+      payment_plan: z.string().optional(),
+      rera_id: z.string().optional(),
+      roi_estimate: z.coerce.number().min(0).optional(),
+    })
+    .optional(),
 });
 
 export type PropertyFormValues = z.infer<typeof propertySchema>;

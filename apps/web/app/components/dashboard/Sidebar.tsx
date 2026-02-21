@@ -46,11 +46,6 @@ export const Sidebar = memo(
     const toggleSidebar = useCallback(() => {
       const newCollapsed = !collapsed;
       onCollapsedChange?.(newCollapsed);
-
-      // Store in localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("sidebar-collapsed", String(newCollapsed));
-      }
     }, [collapsed, onCollapsedChange]);
 
     return (

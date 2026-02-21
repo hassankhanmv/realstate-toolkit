@@ -1,11 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./types";
-
-export type Property = Database["public"]["Tables"]["properties"]["Row"];
-export type PropertyInsert =
-  Database["public"]["Tables"]["properties"]["Insert"];
-export type PropertyUpdate =
-  Database["public"]["Tables"]["properties"]["Update"];
+import type { Database, PropertyInsert, PropertyUpdate } from "./types";
 
 // Fetch all properties for a broker
 export const getPropertiesByBroker = async (
@@ -27,6 +21,75 @@ export const getPropertiesByBroker = async (
     console.error("Error in getPropertiesByBroker:", err);
     throw err;
   }
+};
+
+// Applies filters for advanced search
+export interface PropertyFilters {
+  priceMin?: number;
+  priceMax?: number;
+  bedrooms?: number;
+  status?: string[];
+  type?: string[];
+}
+
+export const getFilteredProperties = async (
+  supabase: SupabaseClient<Database, "public">,
+  brokerId: string,
+  filters: PropertyFilters,
+) => {
+  try {
+    let query = (supabase.from("properties") as any)
+      .select("*")
+      .eq("broker_id", brokerId);
+
+    if (filters.priceMin !== undefined) {
+      query = query.gte("price", filters.priceMin);
+    }
+    if (filters.priceMax !== undefined) {
+      query = query.lte("price", filters.priceMax);
+    }
+    if (filters.bedrooms !== undefined) {
+      query = query.gte("bedrooms", filters.bedrooms);
+    }
+    if (filters.status?.length) {
+      query = query.in("status", filters.status);
+    }
+    if (filters.type?.length) {
+      query = query.in("type", filters.type);
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
+
+    if (error) {
+      throw new Error(`Failed to fetch filtered properties: ${error.message}`);
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Error in getFilteredProperties:", err);
+    throw err;
+  }
+};
+
+// Client-side validation helper
+export const validatePropertyData = (data: {
+  price?: number;
+  is_published?: boolean;
+  images?: string[] | null;
+}) => {
+  const errors: string[] = [];
+
+  if (data.price !== undefined && data.price <= 0) {
+    errors.push("Price must be greater than 0");
+  }
+
+  if (data.is_published && (!data.images || data.images.length === 0)) {
+    errors.push("Published properties must have at least one image");
+  }
+
+  return { valid: errors.length === 0, errors };
 };
 
 // Fetch single property

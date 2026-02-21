@@ -7,6 +7,7 @@ import {
   deleteProperty,
   type PropertyUpdate,
 } from "@repo/supabase";
+import { sendEmail, getPropertyDeletedEmail } from "@repo/email";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const { supabase, headers } = getSupabaseServer(request);
@@ -57,11 +58,9 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   }
 
   // Common: Check ownership before modifying
-  // Note: Optimally, this check should be done inside the service or RLS
-  // For now, we'll rely on RLS or the update/delete call to fail if not owned,
-  // or fetch-check here.
+  let existing: any;
   try {
-    const existing = await getPropertyById(supabase, id);
+    existing = await getPropertyById(supabase, id);
     if (existing.broker_id !== user.id) {
       return data({ error: "Forbidden" }, { status: 403, headers });
     }
@@ -81,7 +80,23 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     }
 
     if (request.method === "DELETE") {
+      const propertyTitle = existing.title || "Untitled Property";
       await deleteProperty(supabase, id);
+
+      // Send deletion notification email to the logged-in user
+      if (user.email) {
+        try {
+          const { subject, html } = getPropertyDeletedEmail({
+            name: user.user_metadata?.full_name || user.email.split("@")[0],
+            propertyTitle,
+          });
+          await sendEmail({ to: user.email, subject, html });
+        } catch (emailErr) {
+          // Don't fail the delete if email fails — just log it
+          console.error("Failed to send property-deleted email:", emailErr);
+        }
+      }
+
       return data({ success: true }, { headers });
     }
 
