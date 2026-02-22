@@ -76,7 +76,7 @@ export const Sidebar = memo(
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="h-8 w-8 hover:bg-slate-100"
+              className="h-8 w-8 hover:bg-slate-100 cursor-pointer"
               title={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
             >
               {collapsed ? (

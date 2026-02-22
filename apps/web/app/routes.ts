@@ -3,14 +3,20 @@ import { type RouteConfig, index, route } from "@react-router/dev/routes";
 export default [
   index("routes/home.tsx"),
   route("about", "routes/about.tsx"),
-  route("login", "routes/login/index.tsx"),
-  route("signup", "routes/signup.tsx"),
-  route("logout", "routes/logout.tsx"),
-  route("dashboard", "routes/dashboard.tsx"),
-  route("dashboard/profile", "routes/dashboard/profile/index.tsx"),
-  route("dashboard/properties", "routes/dashboard/properties/index.tsx"),
-  route("dashboard/properties/:id", "routes/dashboard/properties/$id.tsx"),
-  route("dashboard/leads", "routes/dashboard/leads/index.tsx"),
+  route("login", "routes/(auth)/login/index.tsx"),
+  route("signup", "routes/(auth)/signup/index.tsx"),
+  route("logout", "routes/(auth)/logout/index.tsx"),
+  route("dashboard", "routes/(admin)/dashboard.tsx"),
+  route("dashboard/profile", "routes/(admin)/dashboard/profile/index.tsx"),
+  route(
+    "dashboard/properties",
+    "routes/(admin)/dashboard/properties/index.tsx",
+  ),
+  route(
+    "dashboard/properties/:id",
+    "routes/(admin)/dashboard/properties/$id.tsx",
+  ),
+  route("dashboard/leads", "routes/(admin)/dashboard/leads/index.tsx"),
 
   // API Routes
   route("api/auth/login", "routes/api/auth/login.ts"),

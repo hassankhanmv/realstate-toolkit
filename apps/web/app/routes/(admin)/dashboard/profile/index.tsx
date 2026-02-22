@@ -4,7 +4,8 @@ import { data, useNavigation } from "react-router";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { useDispatch } from "react-redux";
-import { setLoading, setUser } from "~/store/slices/authSlice";
+import { setUser } from "~/store/slices/authSlice";
+import { setLoading } from "~/store/slices/uiSlice";
 import { useEffect } from "react";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {

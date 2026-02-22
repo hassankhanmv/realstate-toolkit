@@ -34,6 +34,7 @@ import { I18nLoader } from "./components/global/I18nLoader";
 import { initializeGlobalApp } from "./lib/common";
 import { useEffect } from "react";
 import { useRouteLoaderData } from "react-router";
+import { Analytics } from "@vercel/analytics/react";
 
 import "./lib/i18n";
 import { registerDevTools } from "./lib/devTools";
@@ -68,7 +69,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
   const { i18n } = useTranslation();
   return (
-    <html lang={i18n.language} dir={i18n.dir()}>
+    <html lang={i18n.language} dir={i18n.dir()} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -82,6 +83,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <GlobalToaster />
           <AppInit />
         </Provider>
+        <Analytics />
         {/* expose ENV to browser */}
         <script
           dangerouslySetInnerHTML={{
