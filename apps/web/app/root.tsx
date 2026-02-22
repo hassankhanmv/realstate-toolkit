@@ -8,6 +8,7 @@ import {
   ScrollRestoration,
 } from "react-router";
 import { useTranslation } from "react-i18next";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -91,6 +92,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <ScrollRestoration />
         <Scripts />
+        <SpeedInsights />
       </body>
     </html>
   );
