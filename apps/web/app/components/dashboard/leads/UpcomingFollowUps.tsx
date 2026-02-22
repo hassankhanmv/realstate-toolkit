@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Card,
@@ -24,8 +24,12 @@ export function UpcomingFollowUps() {
   const { t } = useTranslation();
   const [leads, setLeads] = useState<UpcomingLead[]>([]);
   const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     fetch("/api/leads/upcoming?days=7")
       .then((r) => r.json())
       .then((json) => {

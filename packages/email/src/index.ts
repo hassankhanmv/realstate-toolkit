@@ -12,3 +12,15 @@ export {
   getLeadCreatedEmail,
   type LeadCreatedEmailData,
 } from "./templates/lead-created.js";
+export {
+  getLeadStatusChangeEmail,
+  type LeadStatusChangeEmailData,
+} from "./templates/lead-status-change.js";
+export {
+  getLeadDeletedEmail,
+  type LeadDeletedEmailData,
+} from "./templates/lead-deleted.js";
+export {
+  getFollowUpReminderEmail,
+  type FollowUpReminderEmailData,
+} from "./templates/follow-up-reminder.js";

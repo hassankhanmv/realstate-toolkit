@@ -152,6 +152,35 @@ export type Database = {
           created_at?: string;
         };
       };
+      lead_events: {
+        Row: {
+          id: string;
+          lead_id: string;
+          event_type: string;
+          old_value: string | null;
+          new_value: string | null;
+          broker_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id: string;
+          event_type: string;
+          old_value?: string | null;
+          new_value?: string | null;
+          broker_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string;
+          event_type?: string;
+          old_value?: string | null;
+          new_value?: string | null;
+          broker_id?: string | null;
+          created_at?: string;
+        };
+      };
     };
   };
 };
@@ -165,3 +194,7 @@ export type PropertyUpdate =
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
 export type LeadInsert = Database["public"]["Tables"]["leads"]["Insert"];
 export type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"];
+
+export type LeadEvent = Database["public"]["Tables"]["lead_events"]["Row"];
+export type LeadEventInsert =
+  Database["public"]["Tables"]["lead_events"]["Insert"];

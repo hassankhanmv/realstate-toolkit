@@ -11,6 +11,7 @@
     "next": "Next",
     "cancel": "Cancel",
     "loading": "Loading...",
+    "confirm": "Confirm",
     "table": {
       "search_placeholder": "Search...",
       "no_data": "No data found",

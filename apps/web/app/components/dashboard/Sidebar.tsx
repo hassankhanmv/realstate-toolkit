@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { memo, useCallback, useMemo, useState } from "react";
 import { signOutUser } from "@repo/supabase";
 import { resetAuth } from "@/store/slices/authSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getSupabaseBrowser } from "@/lib/supabase.client";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
-
+import type { RootState } from "@/store/store";
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
@@ -33,6 +33,8 @@ export const Sidebar = memo(
     const dispatch = useDispatch();
     const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
+    const user = useSelector((state: RootState) => state.auth.user);
+
     // Memoize logout handler
     const handleLogout = useCallback(async () => {
       const supabase = getSupabaseBrowser();
@@ -48,6 +50,12 @@ export const Sidebar = memo(
       onCollapsedChange?.(newCollapsed);
     }, [collapsed, onCollapsedChange]);
 
+    const companyName = useMemo(() => {
+      return user?.user_metadata?.company_name
+        ? user.user_metadata.company_name
+        : "U";
+    }, [user?.user_metadata?.company_name]);
+
     return (
       <>
         <div
@@ -61,7 +69,7 @@ export const Sidebar = memo(
           <div className="px-4 py-6 border-b border-slate-200 flex items-center justify-between">
             {!collapsed && (
               <h2 className="text-lg font-bold tracking-tight text-slate-900">
-                {t("sidebar.title")}
+                {companyName}
               </h2>
             )}
             <Button

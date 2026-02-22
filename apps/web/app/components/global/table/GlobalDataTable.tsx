@@ -101,6 +101,8 @@ export function GlobalDataTable<T extends { id?: string | number }>({
 
   const searchValue = searchVal !== undefined ? searchVal : internalSearch;
   const debouncedFilter = useDebounce(searchValue, 300);
+  // True while user is typing and debounce hasn't caught up yet
+  const isFiltering = searchValue !== debouncedFilter;
 
   const handleSearchChange = (val: string) => {
     if (onSearchChange) onSearchChange(val);
@@ -132,6 +134,29 @@ export function GlobalDataTable<T extends { id?: string | number }>({
                 // Number field: greater than or equal
                 if (header.filter!.dataType === "number") {
                   return Number(value) >= Number(filterValue);
+                }
+
+                // Date Range Field
+                if (header.filter!.type === "date-range") {
+                  if (!value) return false;
+                  const dateValue = new Date(String(value));
+                  const range = filterValue as { from?: Date; to?: Date };
+
+                  if (range.from && range.to) {
+                    // Set end date to end of day for inclusive filtering
+                    const endDate = new Date(range.to);
+                    endDate.setHours(23, 59, 59, 999);
+                    return dateValue >= range.from && dateValue <= endDate;
+                  }
+                  if (range.from) {
+                    return dateValue >= range.from;
+                  }
+                  if (range.to) {
+                    const endDate = new Date(range.to);
+                    endDate.setHours(23, 59, 59, 999);
+                    return dateValue <= endDate;
+                  }
+                  return true;
                 }
 
                 // String field: contains
@@ -335,7 +360,37 @@ export function GlobalDataTable<T extends { id?: string | number }>({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody>
+
+              {/* Indeterminate progress bar while search is debouncing */}
+              {isFiltering && (
+                <thead>
+                  <tr>
+                    <th
+                      colSpan={baseColumns.length}
+                      className="p-0 border-0 relative"
+                    >
+                      <div className="h-[2px] w-full bg-secondary overflow-hidden absolute top-0 left-0">
+                        <div className="h-full bg-accent w-1/3 rounded-full animate-[spin_1.5s_linear_infinite] [animation-name:indeterminate-progress] [animation-duration:1.5s] origin-left" />
+                      </div>
+                      <style>{`
+                        @keyframes indeterminate-progress {
+                          0% { transform: translateX(-100%) scaleX(0.2); }
+                          50% { transform: translateX(50%) scaleX(1); }
+                          100% { transform: translateX(300%) scaleX(0.2); }
+                        }
+                      `}</style>
+                    </th>
+                  </tr>
+                </thead>
+              )}
+
+              <TableBody
+                className={
+                  isFiltering
+                    ? "opacity-50 transition-opacity duration-200"
+                    : "transition-opacity duration-200"
+                }
+              >
                 {table.getRowModel().rows.length ? (
                   table
                     .getRowModel()

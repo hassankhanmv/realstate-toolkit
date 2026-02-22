@@ -9,6 +9,7 @@ import {
   createLead,
   bulkUpdateLeads,
   bulkDeleteLeads,
+  createLeadEvent,
   type LeadInsert,
 } from "@repo/supabase";
 
@@ -58,6 +59,16 @@ export async function action({ request }: ActionFunctionArgs) {
       body.broker_id = user.id;
 
       const newLead = await createLead(supabase, body);
+
+      // Log creation event
+      if (newLead?.id) {
+        await createLeadEvent(supabase, {
+          lead_id: newLead.id,
+          event_type: "created",
+          broker_id: user.id,
+        });
+      }
+
       return data({ data: newLead }, { status: 201, headers });
     } catch (error: any) {
       return data({ error: error.message }, { status: 500, headers });
@@ -78,6 +89,21 @@ export async function action({ request }: ActionFunctionArgs) {
         );
       }
       const updated = await bulkUpdateLeads(supabase, body.ids, body.data);
+
+      // Log bulk update events
+      if (updated && updated.length > 0) {
+        for (const lead of updated) {
+          if (body.data.status) {
+            await createLeadEvent(supabase, {
+              lead_id: lead.id,
+              event_type: "status_changed",
+              new_value: body.data.status,
+              broker_id: user.id,
+            });
+          }
+        }
+      }
+
       return data({ data: updated, count: updated?.length ?? 0 }, { headers });
     } catch (error: any) {
       return data({ error: error.message }, { status: 500, headers });

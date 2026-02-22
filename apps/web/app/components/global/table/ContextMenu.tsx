@@ -79,7 +79,7 @@ export function ContextMenu({
                   {opt.icon}
                 </span>
               )}
-              <span className="text-[11px] font-medium tracking-wide">
+              <span className="text-[11px] font-medium tracking-wide truncate">
                 {t(opt.title)}
               </span>
             </DropdownMenuItem>

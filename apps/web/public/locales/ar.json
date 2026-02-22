@@ -11,6 +11,7 @@
     "next": "التالي",
     "cancel": "إلغاء",
     "loading": "جار التحميل...",
+    "confirm": "تأكيد",
     "table": {
       "search_placeholder": "بحث...",
       "no_data": "لم يتم العثور على بيانات",

@@ -22,6 +22,8 @@ export default [
   route("api/fake-bulk-property", "routes/api/fake-bulk-property.ts"),
   route("api/fake-bulk-lead", "routes/api/fake-bulk-lead.ts"),
   route("api/leads", "routes/api/leads.ts"),
+  route("api/leads/:id", "routes/api/leads/$id.ts"),
+  route("api/leads/:id/events", "routes/api/leads/$id.events.ts"),
   route("api/leads/analytics", "routes/api/leads/analytics.ts"),
   route("api/leads/upcoming", "routes/api/leads/upcoming.ts"),
   route("api/email", "routes/api/email.ts"),

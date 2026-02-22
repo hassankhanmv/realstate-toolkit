@@ -5,6 +5,9 @@ import {
   getWelcomeEmail,
   getPropertyDeletedEmail,
   getLeadCreatedEmail,
+  getLeadStatusChangeEmail,
+  getLeadDeletedEmail,
+  getFollowUpReminderEmail,
 } from "@repo/email";
 
 /**
@@ -16,6 +19,9 @@ const TEMPLATES: Record<string, (d: any) => { subject: string; html: string }> =
     welcome: getWelcomeEmail,
     "property-deleted": getPropertyDeletedEmail,
     "lead-created": getLeadCreatedEmail,
+    "lead-status-change": getLeadStatusChangeEmail,
+    "lead-deleted": getLeadDeletedEmail,
+    "follow-up-reminder": getFollowUpReminderEmail,
   };
 
 /**

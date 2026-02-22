@@ -285,3 +285,37 @@ export async function getLeadsAnalytics(
     throw new Error(`Failed to fetch leads analytics: ${error.message}`);
   }
 }
+// --- LEAD EVENTS (AUDIT LOG) ---
+
+export async function getLeadEvents(
+  supabase: SupabaseClient<Database>,
+  leadId: string,
+) {
+  try {
+    const { data, error } = await supabase
+      .from("lead_events")
+      .select("*")
+      .eq("lead_id", leadId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error: any) {
+    console.error("Error fetching lead events:", error);
+    throw new Error(`Failed to fetch lead events: ${error.message}`);
+  }
+}
+
+export async function createLeadEvent(
+  supabase: SupabaseClient<Database>,
+  event: Database["public"]["Tables"]["lead_events"]["Insert"],
+) {
+  try {
+    const { error } = await supabase.from("lead_events").insert([event] as any);
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error("Error creating lead event:", error);
+    throw new Error(`Failed to create lead event: ${error.message}`);
+  }
+}

@@ -19,7 +19,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { setLoading, setUser } from "~/store/slices/authSlice";
+import { setUser } from "~/store/slices/authSlice";
+import { setLoading } from "~/store/slices/uiSlice";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo } from "react";

@@ -3,7 +3,11 @@ import { data, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import { useLoaderData, useNavigation, Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { getSupabaseServer } from "@/lib/supabase.server";
-import { getLeadsByBroker, type Lead } from "@repo/supabase";
+import {
+  getLeadsByBroker,
+  getPropertiesByBroker,
+  type Lead,
+} from "@repo/supabase";
 import Papa from "papaparse";
 import {
   Loader2,
@@ -19,6 +23,7 @@ import {
   Download,
   Trash2,
   CheckSquare,
+  Eye,
 } from "lucide-react";
 
 import { LeadForm } from "@/components/dashboard/leads/LeadForm";
@@ -92,11 +97,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
       leads = allLeads;
     }
 
-    return data({ leads, user, propertyId }, { headers });
+    const allProperties = await getPropertiesByBroker(supabase, user.id);
+    const properties = allProperties.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+    }));
+
+    return data({ leads, user, propertyId, properties }, { headers });
   } catch (error) {
     console.error("Failed to fetch leads:", error);
     return data(
-      { error: "Failed to fetch leads", leads: [], user: null },
+      { error: "Failed to fetch leads", leads: [], user: null, properties: [] },
       { status: 500, headers },
     );
   }
@@ -131,11 +142,14 @@ function StatCard({
 }
 
 export default function LeadsPage() {
-  const { leads, error, user, propertyId } = useLoaderData<typeof loader>() as {
+  const { leads, error, user, propertyId, properties } = useLoaderData<
+    typeof loader
+  >() as {
     leads: any[];
     error?: string;
     user: any;
     propertyId: string | null;
+    properties: Array<{ id: string; title: string }>;
   };
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
@@ -251,6 +265,26 @@ export default function LeadsPage() {
     }
   };
 
+  // Single lead delete
+  const handleSingleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch("/api/leads", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [deleteId] }),
+      });
+      if (res.ok) {
+        toast.success(t("leads.success.deleted"));
+        revalidator.revalidate();
+      }
+    } catch (err) {
+      toast.error(t("leads.errors.delete_failed"));
+    } finally {
+      setDeleteId(null);
+    }
+  };
+
   // CSV export
   const handleExport = (onlySelected: boolean) => {
     const rows = onlySelected
@@ -286,6 +320,7 @@ export default function LeadsPage() {
       {
         id: 1,
         title: "leads.actions.view",
+        icon: <Eye className="h-4 w-4" />,
         onClick: () => handleOpenForm(lead),
       },
     ];
@@ -317,6 +352,16 @@ export default function LeadsPage() {
         icon: <Mail className="h-4 w-4" />,
       });
     }
+
+    // Delete option (destructive, at the end)
+    options.push({
+      id: 10,
+      title: "leads.actions.delete",
+      icon: <Trash2 className="h-4 w-4" />,
+      destructive: true,
+      separator: true,
+      onClick: () => setDeleteId(lead.id),
+    });
 
     return options;
   }, []);
@@ -412,8 +457,37 @@ export default function LeadsPage() {
         accessorKey: "phone",
         text: t("leads.fields.phone", "Contact"),
         cell: (row) => (
-          <div className="flex items-center gap-1.5">
-            <ContactCell phone={row.phone} email={row.email} />
+          <div className="flex items-center gap-1">
+            {/* Phone + Email icons only (no duplicate WhatsApp) */}
+            {row.phone && (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`tel:${row.phone}`, "_self");
+                }}
+              >
+                <Phone className="h-4 w-4" />
+              </Button>
+            )}
+            {row.email && (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-zinc-600 hover:text-zinc-700 hover:bg-zinc-100 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`mailto:${row.email}`, "_self");
+                }}
+              >
+                <Mail className="h-4 w-4" />
+              </Button>
+            )}
+            {/* WhatsApp template button (single green icon) */}
             {row.phone && (
               <WhatsAppTemplateButton
                 phone={row.phone}
@@ -425,6 +499,24 @@ export default function LeadsPage() {
         ),
       },
       {
+        accessorKey: "follow_up_date",
+        text: t("leads.fields.follow_up", "Follow-Up Date"),
+        sortable: true,
+        cell: (row) =>
+          row.follow_up_date ? (
+            <DateCell
+              date={row.follow_up_date}
+              locale={i18n.language === "ar" ? "ar-AE" : "en-US"}
+            />
+          ) : (
+            <span className="text-muted-foreground italic">-</span>
+          ),
+        filter: {
+          type: "date-range",
+          dataType: "string", // not strictly used for date-range but required by type
+        },
+      },
+      {
         accessorKey: "created_at",
         text: t("leads.fields.created_at", "Date"),
         sortable: true,
@@ -434,6 +526,10 @@ export default function LeadsPage() {
             locale={i18n.language === "ar" ? "ar-AE" : "en-US"}
           />
         ),
+        filter: {
+          type: "date-range",
+          dataType: "string",
+        },
       },
     ],
     [t, i18n, selectionVersion],
@@ -584,7 +680,6 @@ export default function LeadsPage() {
             description={t("leads.subtitle")}
             data={leads as any[]}
             search={true}
-            searchVal=""
             contextMenuOptions={getActionOptions}
             massContextMenu={massContextMenu}
             noDataIcon={Building2}
@@ -604,6 +699,7 @@ export default function LeadsPage() {
           onOpenChange={handleCloseForm}
           lead={selectedLead}
           defaultPropertyId={propertyId || undefined}
+          properties={properties}
         />
 
         {/* Bulk delete confirm */}
@@ -617,6 +713,15 @@ export default function LeadsPage() {
             count: selectedIds.size,
           })}
           onConfirm={handleBulkDelete}
+        />
+
+        {/* Single lead delete confirm */}
+        <ConfirmDialog
+          isOpen={!!deleteId}
+          onClose={() => setDeleteId(null)}
+          title={t("leads.delete_confirm_title")}
+          description={t("leads.delete_confirm_desc")}
+          onConfirm={handleSingleDelete}
         />
       </div>
     </DashboardLayout>

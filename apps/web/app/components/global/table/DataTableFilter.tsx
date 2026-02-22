@@ -16,10 +16,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { Column } from "@tanstack/react-table";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import type { DateRange } from "react-day-picker";
 
 export interface FilterConfig {
-  dataType: "string" | "number" | string[] | { label: string; value: string }[];
-  type: "field" | "select";
+  dataType:
+    | "string"
+    | "number"
+    | string[]
+    | { label: string; value: string }[]
+    | "date-range";
+  type: "field" | "select" | "date-range";
   placeholder?: string;
 }
 
@@ -35,6 +42,7 @@ export function DataTableFilter<TData>({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [localValue, setLocalValue] = useState<string>("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const isActive = column.getFilterValue() !== undefined;
 
@@ -49,7 +57,13 @@ export function DataTableFilter<TData>({
   };
 
   const handleApply = () => {
-    if (localValue === "" || localValue === "__all__") {
+    if (filter.type === "date-range") {
+      if (dateRange?.from || dateRange?.to) {
+        column.setFilterValue(dateRange);
+      } else {
+        column.setFilterValue(undefined);
+      }
+    } else if (localValue === "" || localValue === "__all__") {
       column.setFilterValue(undefined);
     } else if (filter.type === "field" && filter.dataType === "number") {
       column.setFilterValue(Number(localValue));
@@ -61,6 +75,7 @@ export function DataTableFilter<TData>({
 
   const handleCancel = () => {
     column.setFilterValue(undefined);
+    setDateRange(undefined);
     setLocalValue("");
     setOpen(false);
   };
@@ -142,6 +157,19 @@ export function DataTableFilter<TData>({
               ))}
             </SelectContent>
           </Select>
+        )}
+
+        {filter.type === "date-range" && (
+          <div className="py-2">
+            <DatePickerWithRange
+              date={dateRange}
+              setDate={setDateRange}
+              placeholder={t(
+                "common.table.select_date_range",
+                "Select date range...",
+              )}
+            />
+          </div>
         )}
 
         <div className="flex items-center gap-3 pt-1">
