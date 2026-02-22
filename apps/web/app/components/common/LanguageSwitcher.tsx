@@ -28,7 +28,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
           variant="ghost"
           size="icon"
           className={cn(
-            "h-9 w-9 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            "h-9 w-9 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer",
             className,
           )}
         >
