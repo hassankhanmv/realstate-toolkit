@@ -33,6 +33,7 @@ import { I18nLoader } from "./components/global/I18nLoader";
 import { initializeGlobalApp } from "./lib/common";
 import { useEffect } from "react";
 import { useRouteLoaderData } from "react-router";
+import { Analytics } from "@vercel/analytics/react";
 
 import "./lib/i18n";
 import { registerDevTools } from "./lib/devTools";
@@ -81,6 +82,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <GlobalToaster />
           <AppInit />
         </Provider>
+        <Analytics />
         {/* expose ENV to browser */}
         <script
           dangerouslySetInnerHTML={{
