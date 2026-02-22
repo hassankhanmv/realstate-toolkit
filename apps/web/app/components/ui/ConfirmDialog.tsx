@@ -48,19 +48,24 @@ export function ConfirmDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-4 flex sm:justify-end gap-2">
-          <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-            {cancelText || t("common.cancel") || "Cancel"}
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            disabled={isLoading}
+            className="cursor-pointer"
+          >
+            {cancelText || t("common.cancel")}
           </Button>
           <Button
             variant={variant}
             onClick={onConfirm}
             disabled={isLoading}
-            className="min-w-[100px]"
+            className="min-w-[100px] cursor-pointer"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              confirmText || t("common.confirm") || "Confirm"
+              confirmText || t("common.confirm")
             )}
           </Button>
         </DialogFooter>
