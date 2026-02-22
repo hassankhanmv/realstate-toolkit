@@ -72,6 +72,7 @@ import { LeadsAnalytics } from "@/components/dashboard/leads/LeadsAnalytics";
 import { UpcomingFollowUps } from "@/components/dashboard/leads/UpcomingFollowUps";
 import { WhatsAppTemplateButton } from "@/components/dashboard/leads/WhatsAppTemplates";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import type { Route } from "./+types";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { supabase, headers } = getSupabaseServer(request);
@@ -111,6 +112,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
     );
   }
 }
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Leads | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "View and manage your leads.",
+    },
+  ];
+};
 
 function StatCard({
   title,

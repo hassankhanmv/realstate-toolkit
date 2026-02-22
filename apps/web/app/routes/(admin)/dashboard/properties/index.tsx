@@ -90,6 +90,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export const action = async (_args: Route.ActionArgs) => null;
 
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Properties | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "View and manage your properties.",
+    },
+  ];
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 // Elegant, theme-compliant badges (White, Gray, Slate, Gold)

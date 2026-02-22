@@ -448,37 +448,30 @@ export function LeadForm({
                       )}
                     />
                   </div>
-
-                  {/* ── Sticky Action Footer (matches PropertyForm) ── */}
-                  <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-border/50 shrink-0 bg-card">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => onOpenChange(false)}
-                      className="h-10 px-5 rounded-lg font-medium text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      {t("common.actions.cancel", "Cancel")}
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="h-10 px-8 rounded-lg font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm min-w-[120px] transition-colors cursor-pointer"
-                    >
-                      {isSubmitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        t("common.actions.save", "Save")
-                      )}
-                    </Button>
-                  </div>
                 </form>
               </Form>
             </TabsContent>
 
             <TabsContent
               value="history"
-              className="flex flex-col flex-1 overflow-hidden m-0 data-[state=inactive]:hidden outline-none bg-muted/10"
+              className="flex flex-col flex-1 overflow-hidden m-0 data-[state=inactive]:hidden outline-none bg-muted/10 relative"
             >
+              <div className="absolute top-4 right-8 z-20">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    historyFetcher.load(`/api/leads/${lead.id}/events`)
+                  }
+                  className="h-8 gap-2 bg-background cursor-pointer"
+                  disabled={historyFetcher.state !== "idle"}
+                >
+                  <History
+                    className={`h-4 w-4 ${historyFetcher.state !== "idle" ? "animate-spin" : ""}`}
+                  />
+                  {t("common.refresh", "Refresh")}
+                </Button>
+              </div>
               <div className="flex-1 overflow-y-auto p-8 border-t border-border/40">
                 {historyFetcher.state !== "idle" &&
                 !historyFetcher.data?.events ? (
@@ -486,7 +479,7 @@ export function LeadForm({
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
                 ) : historyFetcher.data?.events?.length > 0 ? (
-                  <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-[2px] before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+                  <div className="relative mt-8 space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-[2px] before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
                     {historyFetcher.data.events.map((event: any, i: number) => (
                       <div
                         key={event.id}
@@ -533,7 +526,7 @@ export function LeadForm({
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center space-y-3">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mt-8">
                       <History className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div>
@@ -548,6 +541,29 @@ export function LeadForm({
                 )}
               </div>
             </TabsContent>
+
+            {/* SHARED FOOTER FOR BOTH TABS WHEN EDITING PROFILES */}
+            <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-border/50 shrink-0 bg-card z-10">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onOpenChange(false)}
+                className="h-10 px-5 rounded-lg font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                {t("common.actions.cancel", "Cancel")}
+              </Button>
+              <Button
+                onClick={form.handleSubmit(onSubmit as any)}
+                disabled={isSubmitting}
+                className="h-10 px-8 rounded-lg font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm min-w-[120px] transition-colors cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  t("common.actions.save", "Save")
+                )}
+              </Button>
+            </div>
           </Tabs>
         ) : (
           <Form {...form}>
