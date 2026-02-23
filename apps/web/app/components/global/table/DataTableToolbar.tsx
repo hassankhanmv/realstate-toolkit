@@ -45,9 +45,9 @@ export function DataTableToolbar<TData>({
         )}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-row items-center justify-between gap-3 w-full sm:w-auto">
         {search && (
-          <div className="relative w-full sm:w-72">
+          <div className="relative flex-1 sm:w-72">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t("common.table.search_placeholder")}

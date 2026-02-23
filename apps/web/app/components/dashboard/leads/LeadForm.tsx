@@ -158,10 +158,10 @@ export function LeadForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`p-0 bg-card border-border shadow-xl transition-all duration-300 flex flex-col ${
+        className={`p-0 bg-card border-border shadow-xl rounded-xl sm:rounded-2xl transition-all duration-300 flex flex-col ${
           isMaximized
             ? "w-[95vw] max-w-none h-[95vh]"
-            : "sm:max-w-[650px] w-[95vw] h-[85vh] sm:h-[700px] max-h-[90vh]"
+            : "sm:max-w-[600px] w-[95vw] h-[85vh] sm:h-[700px] max-h-[90vh]"
         }`}
       >
         <div className="absolute right-12 top-3 flex items-center gap-1">
@@ -182,10 +182,10 @@ export function LeadForm({
           </Button>
         </div>
 
-        <DialogHeader className="px-8 pt-6 pb-2 shrink-0 border-b border-border/40">
+        <DialogHeader className="px-4 sm:px-8 pt-6 pb-2 shrink-0 border-b border-border/40">
           <div className="flex items-center justify-between">
             <div className="space-y-1 text-start">
-              <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
+              <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
                 {lead
                   ? t("leads.actions.edit", "Edit Lead")
                   : t("leads.actions.add_new", "Add Lead")}
@@ -213,7 +213,7 @@ export function LeadForm({
               }
             }}
           >
-            <div className="px-8 pt-3 pb-0 shrink-0 border-b border-border/40">
+            <div className="px-4 sm:px-8 pt-3 pb-0 shrink-0 border-b border-border/40">
               <TabsList className="h-9 p-0 bg-transparent border-none w-full justify-start gap-6">
                 <TabsTrigger
                   value="details"
@@ -240,7 +240,7 @@ export function LeadForm({
                   className="flex flex-col flex-1 overflow-hidden"
                 >
                   {/* Scrollable Form Body */}
-                  <div className="px-8 pb-6 pt-4 overflow-y-auto flex-1 space-y-4">
+                  <div className="px-4 sm:px-8 pb-6 pt-4 overflow-y-auto flex-1 space-y-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -252,7 +252,7 @@ export function LeadForm({
                           <FormControl>
                             <Input
                               {...field}
-                              className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                              className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                             />
                           </FormControl>
                           <FormMessage />
@@ -273,7 +273,7 @@ export function LeadForm({
                                 {...field}
                                 type="tel"
                                 placeholder="+971XXXXXXXXX"
-                                className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                                className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                               />
                             </FormControl>
                             <FormMessage />
@@ -292,7 +292,7 @@ export function LeadForm({
                               <Input
                                 {...field}
                                 type="email"
-                                className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                                className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                               />
                             </FormControl>
                             <FormMessage />
@@ -315,7 +315,7 @@ export function LeadForm({
                               defaultValue={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger className="rounded-lg border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
+                                <SelectTrigger className="rounded-md border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
                                   <SelectValue placeholder="Select Status" />
                                 </SelectTrigger>
                               </FormControl>
@@ -357,7 +357,7 @@ export function LeadForm({
                               defaultValue={field.value}
                             >
                               <FormControl>
-                                <SelectTrigger className="rounded-lg border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
+                                <SelectTrigger className="rounded-md border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
                                   <SelectValue placeholder="Select Source" />
                                 </SelectTrigger>
                               </FormControl>
@@ -394,7 +394,7 @@ export function LeadForm({
                             <Textarea
                               {...field}
                               rows={3}
-                              className="resize-none rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                              className="resize-none rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                             />
                           </FormControl>
                           <FormMessage />
@@ -420,7 +420,7 @@ export function LeadForm({
                                   "Internal notes, not visible to the client...",
                                 ) as string
                               }
-                              className="resize-none rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                              className="resize-none rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                             />
                           </FormControl>
                           <FormMessage />
@@ -440,7 +440,7 @@ export function LeadForm({
                             <Input
                               {...field}
                               type="date"
-                              className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                              className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                             />
                           </FormControl>
                           <FormMessage />
@@ -456,7 +456,7 @@ export function LeadForm({
               value="history"
               className="flex flex-col flex-1 overflow-hidden m-0 data-[state=inactive]:hidden outline-none bg-muted/10 relative"
             >
-              <div className="absolute top-4 right-8 z-20">
+              <div className="absolute top-4 right-4 sm:right-8 z-20">
                 <Button
                   variant="outline"
                   size="sm"
@@ -472,7 +472,7 @@ export function LeadForm({
                   {t("common.refresh", "Refresh")}
                 </Button>
               </div>
-              <div className="flex-1 overflow-y-auto p-8 border-t border-border/40">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-8 border-t border-border/40">
                 {historyFetcher.state !== "idle" &&
                 !historyFetcher.data?.events ? (
                   <div className="flex items-center justify-center h-40">
@@ -543,19 +543,19 @@ export function LeadForm({
             </TabsContent>
 
             {/* SHARED FOOTER FOR BOTH TABS WHEN EDITING PROFILES */}
-            <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-border/50 shrink-0 bg-card z-10">
+            <div className="flex items-center justify-end gap-3 px-4 sm:px-8 py-4 border-t border-border/50 shrink-0 bg-card z-10">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
-                className="h-10 px-5 rounded-lg font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                className="h-9 px-4 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 {t("common.actions.cancel", "Cancel")}
               </Button>
               <Button
                 onClick={form.handleSubmit(onSubmit as any)}
                 disabled={isSubmitting}
-                className="h-10 px-8 rounded-lg font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm min-w-[120px] transition-colors cursor-pointer"
+                className="h-9 px-6 rounded-md text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm min-w-[100px] transition-colors cursor-pointer"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -571,7 +571,7 @@ export function LeadForm({
               onSubmit={form.handleSubmit(onSubmit as any)}
               className="flex flex-col flex-1 overflow-hidden"
             >
-              <div className="px-8 pb-6 pt-2 overflow-y-auto flex-1 space-y-4">
+              <div className="px-4 sm:px-8 pb-6 pt-2 overflow-y-auto flex-1 space-y-4">
                 {/* Scrollable Area goes here - the code above already includes it, but since we wrapped it we need the non-tabbed version for New leads */}
                 <FormField
                   control={form.control}
@@ -583,7 +583,7 @@ export function LeadForm({
                         <Input
                           {...field}
                           placeholder="John Doe"
-                          className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                          className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                         />
                       </FormControl>
                       <FormMessage />
@@ -604,7 +604,7 @@ export function LeadForm({
                             {...field}
                             type="tel"
                             placeholder="+971XXXXXXXXX"
-                            className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                            className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                           />
                         </FormControl>
                         <FormMessage />
@@ -623,7 +623,7 @@ export function LeadForm({
                           <Input
                             {...field}
                             type="email"
-                            className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                            className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                           />
                         </FormControl>
                         <FormMessage />
@@ -646,7 +646,7 @@ export function LeadForm({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="rounded-lg border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
+                            <SelectTrigger className="rounded-md border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
                               <SelectValue placeholder="Select Status" />
                             </SelectTrigger>
                           </FormControl>
@@ -688,7 +688,7 @@ export function LeadForm({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="rounded-lg border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
+                            <SelectTrigger className="rounded-md border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
                               <SelectValue placeholder="Select Source" />
                             </SelectTrigger>
                           </FormControl>
@@ -727,7 +727,7 @@ export function LeadForm({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="rounded-lg border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
+                          <SelectTrigger className="rounded-md border-border bg-transparent focus:ring-1 focus:ring-offset-0 focus:ring-accent transition-colors">
                             <SelectValue placeholder="Assign to a property (optional)" />
                           </SelectTrigger>
                         </FormControl>
@@ -762,7 +762,7 @@ export function LeadForm({
                         <Input
                           {...field}
                           type="date"
-                          className="rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                          className="rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                         />
                       </FormControl>
                       <FormMessage />
@@ -781,7 +781,7 @@ export function LeadForm({
                       <FormControl>
                         <Textarea
                           {...field}
-                          className="resize-none h-24 rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                          className="resize-none h-24 rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                         />
                       </FormControl>
                       <FormMessage />
@@ -799,7 +799,7 @@ export function LeadForm({
                         <Textarea
                           {...field}
                           placeholder="Optional internal notes..."
-                          className="resize-none h-24 rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
+                          className="resize-none h-24 rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors"
                         />
                       </FormControl>
                       <FormMessage />
@@ -830,7 +830,7 @@ export function LeadForm({
                       <span>{t("common.saving", "Saving")}...</span>
                     </div>
                   ) : (
-                    t("common.save", "Save Lead")
+                    t("leads.save_lead")
                   )}
                 </Button>
               </div>

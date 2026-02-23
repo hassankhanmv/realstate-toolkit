@@ -1,14 +1,35 @@
 import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
-import { type PropertyFormValues, PROPERTY_TYPES, PROPERTY_STATUSES } from "@/validations/property";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  type PropertyFormValues,
+  PROPERTY_TYPES,
+  PROPERTY_STATUSES,
+} from "@/validations/property";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const inputBaseClasses = "h-11 rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors";
+const inputBaseClasses =
+  "h-9 text-sm text-foreground rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors";
 const errorClasses = "text-[11px] font-semibold text-red-500 mt-1";
 
-export function PropertyBasicInfo({ form }: { form: UseFormReturn<PropertyFormValues> }) {
+export function PropertyBasicInfo({
+  form,
+}: {
+  form: UseFormReturn<PropertyFormValues>;
+}) {
   const { t } = useTranslation();
 
   return (
