@@ -11,3 +11,13 @@ export const action = async ({ request }: Route.ActionArgs) => {
 export const loader = async () => {
   return redirect("/");
 };
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Logout | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "Logout from your account.",
+    },
+  ];
+};

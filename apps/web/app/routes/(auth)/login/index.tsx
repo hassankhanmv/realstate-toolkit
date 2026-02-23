@@ -24,6 +24,16 @@ import { loginSchema } from "@/utils/validations/auth";
 import { setUser, setError } from "@/store/slices/authSlice";
 import type { Route } from "./+types/index";
 
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Login | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "Sign in to your Real Estate Toolkit account.",
+    },
+  ];
+};
+
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { supabase, headers } = getSupabaseServer(request);
   const {

@@ -38,6 +38,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   return data({ user }, { headers });
 };
 
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Dashboard | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "Dashboard - View and manage your properties, leads, and users.",
+    },
+  ];
+};
+
 /**
  * Dashboard Route - Optimized with useMemo
  *

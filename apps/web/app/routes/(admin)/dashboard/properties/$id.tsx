@@ -118,6 +118,20 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   return data({ property, formData, leads: leads as any[] }, { headers });
 };
 
+export const meta: Route.MetaFunction = ({ data }) => {
+  if (!data || !data.property) {
+    return [{ title: "Property Details | Real Estate Toolkit" }];
+  }
+  const { property } = data as any;
+  return [
+    { title: `${property.title} | Real Estate Toolkit` },
+    {
+      name: "description",
+      content: `View details for ${data.property.title} located in ${data.property.location}.`,
+    },
+  ];
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function getStatusStyles(status: string) {

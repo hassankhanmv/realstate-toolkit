@@ -1,13 +1,23 @@
 import { useTranslation } from "react-i18next";
 import type { UseFormReturn } from "react-hook-form";
 import { type PropertyFormValues } from "@/validations/property";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
 const errorClasses = "text-[11px] font-semibold text-red-500 mt-1";
 
-export function PropertyPublishing({ form }: { form: UseFormReturn<PropertyFormValues> }) {
+export function PropertyPublishing({
+  form,
+}: {
+  form: UseFormReturn<PropertyFormValues>;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -18,7 +28,7 @@ export function PropertyPublishing({ form }: { form: UseFormReturn<PropertyFormV
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border bg-transparent p-4">
             <div>
-              <FormLabel className="text-base font-semibold text-foreground">
+              <FormLabel className="text-sm font-medium text-foreground">
                 {t("properties.fields.is_published")}
               </FormLabel>
               <p className="text-[13px] text-muted-foreground mt-0.5">

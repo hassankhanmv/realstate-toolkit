@@ -46,7 +46,7 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
         <div
           ref={ref}
           className={cn(
-            "relative flex items-center justify-between w-full px-6",
+            "relative flex items-center justify-between w-full px-2 sm:px-6",
             className,
           )}
           {...props}
@@ -111,7 +111,7 @@ const StepperIndicator = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 group-hover:scale-105",
+        "flex h-8 w-8 text-xs items-center justify-center rounded-full border-[1.5px] transition-all duration-200 group-hover:scale-105",
         {
           "border-accent bg-accent text-accent-foreground shadow-md":
             state === "active",
@@ -144,7 +144,8 @@ const StepperTitle = React.forwardRef<
     <span
       ref={ref}
       className={cn(
-        "text-xs font-semibold uppercase tracking-wider transition-colors",
+        "text-[10px] sm:text-xs font-medium uppercase tracking-wide transition-colors",
+        state !== "active" && "hidden sm:block",
         {
           "text-foreground": state === "active" || state === "completed",
           "text-destructive/80": state === "error",

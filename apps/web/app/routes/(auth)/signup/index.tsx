@@ -37,6 +37,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   return data(null, { headers });
 };
 
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Sign Up | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "Sign up for a new account.",
+    },
+  ];
+};
+
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
   const name = formData.get("name") as string;

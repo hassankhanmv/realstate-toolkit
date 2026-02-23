@@ -216,7 +216,7 @@ export function PropertyForm({
   };
 
   const inputBaseClasses =
-    "h-11 rounded-lg border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors";
+    "h-9 text-sm text-foreground rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent transition-colors";
   const errorClasses = "text-[11px] font-semibold text-red-500 mt-1";
 
   return (
@@ -653,7 +653,7 @@ export function PropertyForm({
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border bg-transparent p-4">
                     <div>
-                      <FormLabel className="text-base font-semibold text-foreground">
+                      <FormLabel className="text-sm font-medium text-foreground">
                         {t("properties.fields.is_published")}
                       </FormLabel>
                       <p className="text-[13px] text-muted-foreground mt-0.5">
@@ -722,10 +722,9 @@ export function PropertyForm({
               variant="secondary"
               size="icon"
               onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className="h-10 w-10 rounded-lg bg-secondary/60 hover:bg-secondary transition-colors disabled:opacity-50"
+              className="h-9 w-9 rounded-md bg-secondary/60 hover:bg-secondary transition-colors disabled:opacity-50"
             >
-              <ChevronLeft className="h-5 w-5 rtl:rotate-180 text-foreground" />
+              <ChevronLeft className="h-4 w-4 rtl:rotate-180 text-foreground" />
             </Button>
             <Button
               type="button"
@@ -733,9 +732,9 @@ export function PropertyForm({
               size="icon"
               onClick={handleNext}
               disabled={currentStep === STEPS.length - 1}
-              className="h-10 w-10 rounded-lg bg-secondary/60 hover:bg-secondary transition-colors disabled:opacity-50"
+              className="h-9 w-9 rounded-md bg-secondary/60 hover:bg-secondary transition-colors disabled:opacity-50"
             >
-              <ChevronRight className="h-5 w-5 rtl:rotate-180 text-foreground" />
+              <ChevronRight className="h-4 w-4 rtl:rotate-180 text-foreground" />
             </Button>
           </div>
 
@@ -744,7 +743,7 @@ export function PropertyForm({
               type="button"
               variant="ghost"
               onClick={onCancel}
-              className="h-10 px-5 rounded-lg font-medium text-muted-foreground hover:text-foreground"
+              className="h-9 px-4 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               {t("properties.cancel")}
             </Button>
@@ -752,7 +751,7 @@ export function PropertyForm({
             <Button
               type="submit"
               disabled={isLoading}
-              className="h-10 px-8 rounded-lg font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm min-w-[120px] transition-colors"
+              className="h-9 px-6 rounded-md text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm min-w-[100px] transition-colors"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

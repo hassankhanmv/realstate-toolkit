@@ -90,6 +90,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
 export const action = async (_args: Route.ActionArgs) => null;
 
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: "Properties | Real Estate Toolkit" },
+    {
+      name: "description",
+      content: "View and manage your properties.",
+    },
+  ];
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 // Elegant, theme-compliant badges (White, Gray, Slate, Gold)
@@ -630,10 +640,10 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
         >
           {/* Dynamic classes for width/height based on isMaximized state */}
           <DialogContent
-            className={`p-0 bg-card border-border shadow-xl transition-all duration-300 flex flex-col ${
+            className={`p-0 bg-card border-border shadow-xl rounded-xl sm:rounded-2xl transition-all duration-300 flex flex-col ${
               isMaximized
-                ? "w-[85vw] max-w-none h-[90vh]"
-                : "sm:max-w-[850px] max-h-[90vh]"
+                ? "w-[95vw] max-w-none h-[95vh]"
+                : "sm:max-w-[750px] w-[95vw] h-[85vh] sm:h-[90vh] max-h-[90vh]"
             }`}
           >
             <div className="absolute right-12 top-3 flex items-center gap-1">
@@ -669,9 +679,9 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
               )}
             </div>
 
-            <DialogHeader className="px-8 pt-8 pb-4 shrink-0">
+            <DialogHeader className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 shrink-0">
               <div className="space-y-1.5 text-start">
-                <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+                <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
                   {selectedProperty
                     ? t("properties.edit")
                     : t("properties.add_new")}
@@ -683,7 +693,7 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
             </DialogHeader>
 
             {/* Added overflow-y-auto so the form scrolls perfectly when height is maxed */}
-            <div className="px-8 pb-8 pt-2 overflow-y-auto flex-1">
+            <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-2 overflow-y-auto flex-1">
               <PropertyForm
                 defaultValues={
                   selectedProperty ? toFormValues(selectedProperty) : undefined

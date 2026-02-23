@@ -114,6 +114,7 @@ export const MobileBottomNav = memo(function MobileBottomNav({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="w-64 bg-white border-slate-200"
+              side="top"
               align="end"
               forceMount
             >

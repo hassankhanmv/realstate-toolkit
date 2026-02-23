@@ -21,15 +21,15 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   return data({ user }, { headers });
 };
 
-export function meta() {
+export const meta: Route.MetaFunction = () => {
   return [
-    { title: "Profile - UAE Estates" },
+    { title: "Profile | Real Estate Toolkit" },
     {
       name: "description",
       content: "Manage your profile and account settings",
     },
   ];
-}
+};
 
 export default function ProfilePage({ loaderData }: Route.ComponentProps) {
   if (!loaderData) return null;
