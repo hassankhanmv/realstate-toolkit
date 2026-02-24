@@ -6,11 +6,11 @@ import { sidebarMenuItems } from "@/config/menuConfig";
 import { Button } from "@/components/ui/button";
 import { memo, useCallback, useMemo, useState } from "react";
 import { signOutUser } from "@repo/supabase";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "@/store/store";
 import { resetAuth } from "@/store/slices/authSlice";
-import { useDispatch, useSelector } from "react-redux";
 import { getSupabaseBrowser } from "@/lib/supabase.client";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
-import type { RootState } from "@/store/store";
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
@@ -90,38 +90,65 @@ export const Sidebar = memo(
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4">
             <div className="space-y-1">
-              {sidebarMenuItems.map((item) => {
-                const isActive =
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
+              {sidebarMenuItems
+                .filter((item) => {
+                  if (!user?.profile || !user.profile.permissions) return false;
 
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative",
-                      collapsed && "justify-center",
-                      isActive
-                        ? "bg-accent/10 text-accent-foreground"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-                    )}
-                    title={collapsed ? t(item.label) : undefined}
-                  >
-                    {isActive && (
-                      <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-e" />
-                    )}
-                    <item.icon
+                  // Parse permissions if it's a string
+                  let perms: any = {};
+                  const profPerms = user.profile.permissions as any;
+                  if (typeof profPerms === "string") {
+                    try {
+                      perms = JSON.parse(profPerms);
+                    } catch (e) {}
+                  } else {
+                    perms = profPerms;
+                  }
+
+                  if (item.href.includes("properties")) {
+                    return !!perms?.properties?.view;
+                  }
+                  if (item.href.includes("leads")) {
+                    return !!perms?.leads?.view;
+                  }
+                  if (item.href.includes("users")) {
+                    return !!perms?.users?.view;
+                  }
+                  // Overview/dashboard root
+                  return true;
+                })
+                .map((item) => {
+                  const isActive =
+                    item.href === "/dashboard"
+                      ? pathname === "/dashboard"
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
                       className={cn(
-                        "h-5 w-5 flex-shrink-0",
-                        isActive && "text-accent",
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative",
+                        collapsed && "justify-center",
+                        isActive
+                          ? "bg-accent/10 text-accent-foreground"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                       )}
-                    />
-                    {!collapsed && <span>{t(item.label)}</span>}
-                  </Link>
-                );
-              })}
+                      title={collapsed ? t(item.label) : undefined}
+                    >
+                      {isActive && (
+                        <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-e" />
+                      )}
+                      <item.icon
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isActive && "text-accent",
+                        )}
+                      />
+                      {!collapsed && <span>{t(item.label)}</span>}
+                    </Link>
+                  );
+                })}
             </div>
           </nav>
 

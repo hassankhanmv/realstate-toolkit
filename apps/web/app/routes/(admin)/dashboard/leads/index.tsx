@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { data, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import { useLoaderData, useNavigation, Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { getSupabaseServer } from "@/lib/supabase.server";
 import {
   getLeadsByBroker,
   getPropertiesByBroker,
@@ -75,15 +74,16 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Route } from "./+types";
 import StatCard from "~/components/global/StatCard";
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const { supabase, headers } = getSupabaseServer(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+import { requirePermission } from "@/lib/auth.server";
 
-  if (!user) {
-    return data({ error: "Unauthorized", leads: [] }, { status: 401, headers });
-  }
+export async function loader({ request }: LoaderFunctionArgs) {
+  const { supabase, headers, user } = await requirePermission(
+    request,
+    "leads",
+    "view",
+  ).catch((err) => {
+    throw err;
+  });
 
   try {
     const url = new URL(request.url);
@@ -123,7 +123,6 @@ export const meta: Route.MetaFunction = () => {
     },
   ];
 };
-
 
 export default function LeadsPage() {
   const { leads, error, user, propertyId, properties } = useLoaderData<

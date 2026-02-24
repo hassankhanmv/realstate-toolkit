@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import type { Route } from "./+types/index";
 import { data, useNavigate, useNavigation, useRevalidator } from "react-router";
 import { useTranslation } from "react-i18next";
-import { getSupabaseServer } from "@/lib/supabase.server";
 import { getPropertiesByBroker, type Property } from "@repo/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,20 +57,18 @@ import { setLoading, addToast } from "~/store/slices/uiSlice";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { setUser } from "~/store/slices/authSlice";
 
+import { requirePermission } from "@/lib/auth.server";
+
 // ── Loader ──────────────────────────────────────────────────────────────────
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-  const { supabase, headers } = getSupabaseServer(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return data(
-      { error: "Unauthorized", properties: [] as Property[], user: null },
-      { status: 401, headers },
-    );
-  }
+  const { supabase, headers, user } = await requirePermission(
+    request,
+    "properties",
+    "view",
+  ).catch((err) => {
+    throw err;
+  });
 
   try {
     const properties = await getPropertiesByBroker(supabase, user.id);

@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import type { Route } from "./+types/index";
 import { data, useNavigate, useNavigation, useRevalidator } from "react-router";
 import { useTranslation } from "react-i18next";
-import { getSupabaseServer } from "@/lib/supabase.server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router";
@@ -38,18 +37,16 @@ import { setLoading, setTableLoading } from "~/store/slices/uiSlice";
 import StatCard from "~/components/global/StatCard";
 import type { RootState } from "~/store/store";
 
-export const loader = async ({ request }: Route.LoaderArgs) => {
-  const { supabase, headers } = getSupabaseServer(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+import { requirePermission } from "@/lib/auth.server";
 
-  if (!user) {
-    return data(
-      { error: "Unauthorized", users: [] as Profile[], currentUser: null },
-      { status: 401, headers },
-    );
-  }
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const { supabase, headers, user } = await requirePermission(
+    request,
+    "users",
+    "view",
+  ).catch((err) => {
+    throw err;
+  });
 
   try {
     const { data: profiles, error } = await supabase
@@ -70,7 +67,9 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       },
     );
 
-    const { data: authUsers } = await adminAuthClient.auth.admin.listUsers();
+    const { data: authUsers } = await adminAuthClient.auth.admin.listUsers({
+      perPage: 1000,
+    });
     const emailMap = new Map(
       authUsers?.users.map((u) => [u.id, u.email]) || [],
     );
@@ -148,83 +147,86 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
   }, [revalidator.state, navigation.state, dispatch]);
 
   // Headers configuration
-  const headers: HeaderConfig<any>[] = [
-    {
-      accessorKey: "full_name",
-      text: "users.headers.name",
-      sortable: true,
-      cell: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col">
-            <span className="font-semibold text-foreground text-sm flex items-center gap-1.5">
-              {row.full_name}
-              {row.role === "admin" && (
-                <Shield className="h-3 w-3 text-amber-500" />
-              )}
-            </span>
-            {row.company_name && (
-              <span className="text-xs text-muted-foreground">
-                {row.company_name}
+  const headers: HeaderConfig<any>[] = useMemo(
+    () => [
+      {
+        accessorKey: "full_name",
+        text: "users.headers.name",
+        sortable: true,
+        cell: (row) => (
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col">
+              <span className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                {row.full_name}
+                {row.role === "admin" && (
+                  <Shield className="h-3 w-3 text-amber-500" />
+                )}
               </span>
-            )}
+              {row.company_name && (
+                <span className="text-xs text-muted-foreground">
+                  {row.company_name}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      ),
-    },
-    {
-      type: "action",
-      text: "",
-      align: "end",
-      menuSide: "bottom",
-      menuAlign: "end",
-    },
-    {
-      accessorKey: "email",
-      text: "users.headers.email",
-      sortable: true,
-      cell: (row) => (
-        <span className="text-sm text-slate-600 dark:text-slate-400">
-          {row.email || "—"}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "role",
-      text: "users.headers.role",
-      sortable: true,
-      cell: (row) => (
-        <span className="capitalize px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs">
-          {row.role
-            ? t(`users.roles.${row.role}`, { defaultValue: row.role })
-            : t("users.roles.agent")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      text: "users.headers.status",
-      cell: (row) => (
-        <Badge
-          variant={row.is_disabled ? "destructive" : "secondary"}
-          className="font-medium text-[10px] uppercase"
-        >
-          {row.is_disabled
-            ? t("users.status.disabled")
-            : t("users.status.active")}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "created_at",
-      text: "users.headers.created",
-      sortable: true,
-      cell: (row) => (
-        <span className="text-xs font-medium text-slate-500 whitespace-nowrap">
-          {row.created_at ? formatTimeAgo(row.created_at) : "—"}
-        </span>
-      ),
-    },
-  ];
+        ),
+      },
+      {
+        type: "action",
+        text: "",
+        align: "end",
+        menuSide: "bottom",
+        menuAlign: "end",
+      },
+      {
+        accessorKey: "email",
+        text: "users.headers.email",
+        sortable: true,
+        cell: (row) => (
+          <span className="text-sm text-slate-600 dark:text-slate-400">
+            {row.email || "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "role",
+        text: "users.headers.role",
+        sortable: true,
+        cell: (row) => (
+          <span className="capitalize px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs">
+            {row.role
+              ? t(`users.roles.${row.role}`, { defaultValue: row.role })
+              : t("users.roles.agent")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        text: "users.headers.status",
+        cell: (row) => (
+          <Badge
+            variant={row.is_disabled ? "destructive" : "secondary"}
+            className="font-medium text-[10px] uppercase"
+          >
+            {row.is_disabled
+              ? t("users.status.disabled")
+              : t("users.status.active")}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "created_at",
+        text: "users.headers.created",
+        sortable: true,
+        cell: (row) => (
+          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">
+            {row.created_at ? formatTimeAgo(row.created_at) : "—"}
+          </span>
+        ),
+      },
+    ],
+    [t],
+  );
 
   const handleEdit = (userReq: Profile & { email?: string }) => {
     setSelectedUser(userReq);
@@ -368,11 +370,15 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
   };
 
   // Row mapper
-  const tableData = users.map((userObj: any) => ({
-    ...userObj,
-    id: userObj.id,
-    original: userObj,
-  }));
+  const tableData = useMemo(
+    () =>
+      users.map((userObj: any) => ({
+        ...userObj,
+        id: userObj.id,
+        original: userObj,
+      })),
+    [users],
+  );
 
   const contextMenuOptions = useCallback(
     (rowOriginal: any): ContextMenuOption[] => [
@@ -390,8 +396,14 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
       },
       {
         id: 3,
-        title: "users.actions.disable",
-        icon: <UserX className="h-4 w-4" />,
+        title: rowOriginal.is_disabled
+          ? "users.actions.enable"
+          : "users.actions.disable",
+        icon: rowOriginal.is_disabled ? (
+          <Shield className="h-4 w-4" />
+        ) : (
+          <UserX className="h-4 w-4" />
+        ),
         onClick: () => handleDisablePrompt(rowOriginal),
       },
       {
@@ -411,25 +423,28 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
     [navigate],
   );
 
-  const massActions: ContextMenuOption[] = [
-    {
-      id: 1,
-      title: "users.actions.add_new",
-      icon: <Plus className="h-4 w-4" />,
-      onClick: () => {
-        setSelectedUser(undefined);
-        setModalOpen(true);
+  const massActions: ContextMenuOption[] = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "users.actions.add_new",
+        icon: <Plus className="h-4 w-4" />,
+        onClick: () => {
+          setSelectedUser(undefined);
+          setModalOpen(true);
+        },
       },
-    },
-    {
-      id: 2,
-      title: "Refresh Data", // Hardcoded fallback for missing translation text
-      icon: <RefreshCw className="h-4 w-4" />,
-      onClick: () => {
-        revalidator.revalidate();
+      {
+        id: 2,
+        title: "Refresh Data", // Hardcoded fallback for missing translation text
+        icon: <RefreshCw className="h-4 w-4" />,
+        onClick: () => {
+          revalidator.revalidate();
+        },
       },
-    },
-  ];
+    ],
+    [revalidator],
+  );
 
   return (
     <DashboardLayout>

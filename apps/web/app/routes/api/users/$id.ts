@@ -69,9 +69,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
             process.env.VITE_SUPABASE_ANON_KEY!,
           { auth: { autoRefreshToken: false, persistSession: false } },
         );
-        const { data: authUsers } =
-          await adminAuthClient.auth.admin.listUsers();
-        const emailAddress = authUsers?.users.find((u) => u.id === id)?.email;
+        const { data: userData } =
+          await adminAuthClient.auth.admin.getUserById(id);
+        const emailAddress = userData?.user?.email;
         if (emailAddress) {
           const emailTemplate = getAccountDisabledEmail({
             name: validatedData.full_name,

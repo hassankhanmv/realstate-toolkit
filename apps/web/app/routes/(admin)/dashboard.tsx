@@ -1,6 +1,5 @@
 import type { Route } from "./+types/dashboard";
-import { getSupabaseServer } from "@/lib/supabase.server";
-import { data, useNavigation } from "react-router";
+import { data, useNavigation, redirect } from "react-router";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { Tile } from "@/components/dashboard/Tile";
 import {
@@ -24,16 +23,12 @@ import { setLoading } from "~/store/slices/uiSlice";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo } from "react";
+import { requireAuth } from "@/lib/auth.server";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-  const { supabase, headers } = getSupabaseServer(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return data(null, { status: 302, headers: { Location: "/login" } });
-  }
+  const { user, headers } = await requireAuth(request).catch((err) => {
+    throw err;
+  });
 
   return data({ user }, { headers });
 };
@@ -61,7 +56,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
-  // Set user in redux store (in useEffect to avoid setting state during render)
+
+  // Set user and profile in redux store (in useEffect to avoid setting state during render)
   useEffect(() => {
     if (user) {
       dispatch(setUser(user));
