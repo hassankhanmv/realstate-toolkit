@@ -1,5 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import type { Database } from "./types";
+
+export type UserWithProfile = User & {
+  profile?: Database["public"]["Tables"]["profiles"]["Row"];
+};
 
 export const signUpUser = async (
   supabase: SupabaseClient<Database>,
@@ -31,9 +36,35 @@ export const signOutUser = async (supabase: SupabaseClient<Database>) => {
   return await supabase.auth.signOut();
 };
 
-export const getCurrentUser = async (supabase: SupabaseClient<Database>) => {
+export const getCurrentUser = async (
+  supabase: SupabaseClient<Database>,
+): Promise<{ data: { user: UserWithProfile | null }; error: any }> => {
   // console.log("getCurrentUser called"); // excessive logging
-  return await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { data: { user: null }, error: authError };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError && profileError.code !== "PGRST116") {
+    console.error("Error fetching profile in getCurrentUser:", profileError);
+  }
+
+  const userWithProfile: UserWithProfile = {
+    ...user,
+    profile: profile || undefined,
+  };
+
+  return { data: { user: userWithProfile }, error: null };
 };
 
 // Properties methods are now in properties.ts

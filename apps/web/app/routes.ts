@@ -17,6 +17,7 @@ export default [
     "routes/(admin)/dashboard/properties/$id.tsx",
   ),
   route("dashboard/leads", "routes/(admin)/dashboard/leads/index.tsx"),
+  route("dashboard/users", "routes/(admin)/dashboard/users/index.tsx"),
 
   // API Routes
   route("api/auth/login", "routes/api/auth/login.ts"),
@@ -33,4 +34,7 @@ export default [
   route("api/leads/analytics", "routes/api/leads/analytics.ts"),
   route("api/leads/upcoming", "routes/api/leads/upcoming.ts"),
   route("api/email", "routes/api/email.ts"),
+  route("api/users", "routes/api/users.ts"),
+  route("api/users/:id", "routes/api/users/$id.ts"),
+  route("api/users/reset-password", "routes/api/users/reset-password.ts"),
 ] satisfies RouteConfig;

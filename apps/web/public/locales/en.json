@@ -397,5 +397,93 @@
       "export_csv": "Export CSV",
       "exported": "Data exported successfully"
     }
+  },
+  "users": {
+    "description": "Manage team members, roles, and configure system access privileges.",
+    "add_user": "Add User",
+    "headers": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "created": "Created"
+    },
+    "actions": {
+      "add_new": "Add New",
+      "edit": "Edit",
+      "view_details": "View Details",
+      "disable": "Disable"
+    },
+    "stats": {
+      "total": "Total Users",
+      "total_desc": "Registered accounts",
+      "active": "Active Team",
+      "active_desc": "Unrestricted access",
+      "disabled": "Disabled/Revoked",
+      "disabled_desc": "Action required"
+    },
+    "dialog": {
+      "restrict_title": "Restrict User Access",
+      "restrict_desc": "Are you sure you want to disable {{name}}'s account? They will be immediately disconnected and prevented from logging back in.",
+      "restrict_confirm": "Disable Access"
+    },
+    "form": {
+      "add_title": "Add New User",
+      "add_desc": "Create a new team member.",
+      "edit_title": "Edit User",
+      "edit_desc": "Update user profile and permissions.",
+      "expired_alert": "This user's account has expired and is currently restricted.",
+      "tabs": {
+        "details": "Details",
+        "permissions": "Permissions",
+        "notifications": "Notifications"
+      },
+      "fields": {
+        "full_name": "Full Name",
+        "email": "Email",
+        "password": "Password",
+        "password_help": "(Leave blank to keep current)",
+        "disable_account": "Disable Account",
+        "disable_account_desc": "Prevent this user from logging in.",
+        "expiry_date": "Account Expiry Date",
+        "role": "Role"
+      },
+      "permissions": {
+        "properties": "Properties Permissions",
+        "leads": "Leads Permissions",
+        "users": "Users Permissions",
+        "view": "View",
+        "edit": "Edit",
+        "create": "Create",
+        "delete": "Delete",
+        "global_settings": "Global Settings",
+        "analytics": "View Analytics Dashboard",
+        "profile": "Edit Own Profile"
+      },
+      "notifications": {
+        "on_login": "Notify on Login",
+        "on_login_desc": "Receive an email when this user logs in.",
+        "on_disable": "Notify on Account Disable",
+        "on_disable_desc": "Send an alert if this account gets disabled.",
+        "on_expiry": "Notify on Account Expiry",
+        "on_expiry_desc": "Send an alert when the account expires mapping to the defined expiry date."
+      },
+      "cancel": "Cancel",
+      "save": "Save User",
+      "saving": "Saving..."
+    },
+    "success": {
+      "created": "User created successfully",
+      "updated": "User updated successfully",
+      "restricted": "User {{name}} has been restricted access."
+    },
+    "roles": {
+      "admin": "Admin",
+      "agent": "Agent"
+    },
+    "status": {
+      "disabled": "Disabled",
+      "active": "Active"
+    }
   }
 }
