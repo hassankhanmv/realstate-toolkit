@@ -46,6 +46,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { useAppSelector } from "~/store/hooks";
 
 export interface HeaderConfig<T = any> {
   text: string;
@@ -95,6 +96,7 @@ export function GlobalDataTable<T extends { id?: string | number }>({
   noDataAction,
 }: GlobalDataTableProps<T>) {
   const { t } = useTranslation();
+  const tableLoading = useAppSelector((state) => state.ui.isTableLoading);
   const [internalSearch, setInternalSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -361,8 +363,8 @@ export function GlobalDataTable<T extends { id?: string | number }>({
                 ))}
               </TableHeader>
 
-              {/* Indeterminate progress bar while search is debouncing */}
-              {isFiltering && (
+              {/* Indeterminate progress bar while search is debouncing or data is loading */}
+              {(isFiltering || tableLoading) && (
                 <thead>
                   <tr>
                     <th
@@ -386,7 +388,7 @@ export function GlobalDataTable<T extends { id?: string | number }>({
 
               <TableBody
                 className={
-                  isFiltering
+                  isFiltering || tableLoading
                     ? "opacity-50 transition-opacity duration-200"
                     : "transition-opacity duration-200"
                 }

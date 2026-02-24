@@ -9,11 +9,13 @@ export interface Toast {
 
 export interface UiState {
   isLoading: boolean;
+  isTableLoading: boolean;
   toasts: Toast[];
 }
 
 const initialState: UiState = {
   isLoading: false,
+  isTableLoading: false,
   toasts: [],
 };
 
@@ -23,6 +25,9 @@ export const uiSlice = createSlice({
   reducers: {
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
+    },
+    setTableLoading: (state, action: PayloadAction<boolean>) => {
+      state.isTableLoading = action.payload;
     },
     addToast: (state, action: PayloadAction<Omit<Toast, "id">>) => {
       const id = Math.random().toString(36).substring(7);
@@ -36,6 +41,7 @@ export const uiSlice = createSlice({
   },
 });
 
-export const { setLoading, addToast, removeToast } = uiSlice.actions;
+export const { setLoading, setTableLoading, addToast, removeToast } =
+  uiSlice.actions;
 
 export default uiSlice.reducer;

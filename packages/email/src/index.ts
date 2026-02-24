@@ -24,3 +24,11 @@ export {
   getFollowUpReminderEmail,
   type FollowUpReminderEmailData,
 } from "./templates/follow-up-reminder.js";
+export {
+  getPasswordResetEmail,
+  type PasswordResetEmailData,
+} from "./templates/password-reset.js";
+export {
+  getAccountDisabledEmail,
+  type AccountDisabledEmailData,
+} from "./templates/account-disabled.js";

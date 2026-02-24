@@ -8,6 +8,35 @@ export type Database = {
           company_name: string | null;
           avatar_url: string | null;
           created_at: string;
+          role: string | null;
+          is_disabled: boolean | null;
+          expiry_date: string | null;
+          permissions: any | null;
+          notifications: any | null;
+        };
+        Insert: {
+          id: string;
+          full_name?: string | null;
+          company_name?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          role?: string | null;
+          is_disabled?: boolean | null;
+          expiry_date?: string | null;
+          permissions?: any | null;
+          notifications?: any | null;
+        };
+        Update: {
+          id?: string;
+          full_name?: string | null;
+          company_name?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          role?: string | null;
+          is_disabled?: boolean | null;
+          expiry_date?: string | null;
+          permissions?: any | null;
+          notifications?: any | null;
         };
       };
       properties: {
@@ -182,8 +211,24 @@ export type Database = {
         };
       };
     };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 };
+
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 export type Property = Database["public"]["Tables"]["properties"]["Row"];
 export type PropertyInsert =

@@ -20,6 +20,7 @@ interface ConfirmDialogProps {
   cancelText?: string;
   isLoading?: boolean;
   variant?: "default" | "destructive";
+  children?: React.ReactNode;
 }
 
 export function ConfirmDialog({
@@ -32,6 +33,7 @@ export function ConfirmDialog({
   cancelText,
   isLoading,
   variant = "destructive",
+  children,
 }: ConfirmDialogProps) {
   const { t } = useTranslation();
 
@@ -47,6 +49,7 @@ export function ConfirmDialog({
             {description}
           </DialogDescription>
         </DialogHeader>
+        {children && <div className="mt-4">{children}</div>}
         <DialogFooter className="mt-4 flex sm:justify-end gap-2">
           <Button
             variant="ghost"

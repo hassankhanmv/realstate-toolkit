@@ -73,6 +73,7 @@ import { UpcomingFollowUps } from "@/components/dashboard/leads/UpcomingFollowUp
 import { WhatsAppTemplateButton } from "@/components/dashboard/leads/WhatsAppTemplates";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Route } from "./+types";
+import StatCard from "~/components/global/StatCard";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { supabase, headers } = getSupabaseServer(request);
@@ -123,33 +124,6 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-}: {
-  title: string;
-  value: number | string;
-  icon: any;
-}) {
-  return (
-    <Card className="border-border shadow-sm transition-all hover:shadow-md bg-card">
-      <CardContent className="flex flex-row items-center justify-between gap-4 p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary/80 text-primary">
-            <Icon className="h-4 w-4" />
-          </div>
-          <p className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-            {title}
-          </p>
-        </div>
-        <p className="text-xl font-bold tracking-tight text-foreground">
-          {value}
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function LeadsPage() {
   const { leads, error, user, propertyId, properties } = useLoaderData<

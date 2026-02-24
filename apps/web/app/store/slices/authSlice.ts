@@ -4,12 +4,14 @@ import type { User } from "@supabase/supabase-js";
 interface AuthState {
   user: User | null;
   loading: boolean;
+  tableLoading: boolean;
   error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
   loading: false,
+  tableLoading: false,
   error: null,
 };
 
@@ -23,6 +25,9 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    setTableLoading: (state, action: PayloadAction<boolean>) => {
+      state.tableLoading = action.payload;
+    },
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
@@ -34,5 +39,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setLoading, setError, resetAuth } = authSlice.actions;
+export const { setUser, setLoading, setTableLoading, setError, resetAuth } =
+  authSlice.actions;
 export default authSlice.reducer;
