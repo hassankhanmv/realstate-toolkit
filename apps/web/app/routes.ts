@@ -38,3 +38,4 @@ export default [
   route("api/users/:id", "routes/api/users/$id.ts"),
   route("api/users/reset-password", "routes/api/users/reset-password.ts"),
 ] satisfies RouteConfig;
+
