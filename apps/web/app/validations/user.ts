@@ -20,7 +20,7 @@ export const userPermissionsSchema = z.object({
     delete: z.boolean().default(false),
   }),
   analytics: z.boolean().default(false),
-  profile: z.boolean().default(true),
+  profile: z.boolean().default(false),
 });
 
 export const userNotificationsSchema = z.object({
@@ -30,12 +30,13 @@ export const userNotificationsSchema = z.object({
 });
 
 export const userFormSchema = z.object({
-  full_name: z.string().min(2, "Full name is required"),
-  email: z.string().email("Invalid email address"),
+  full_name: z.string().min(2, "validations.full_name_min"),
+  email: z.string().email("validations.invalid_email"),
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .optional(), // Optional for editing
+    .min(6, "validations.password_min")
+    .optional()
+    .or(z.literal("")), // Optional for editing
   role: z.string().default("agent"),
   is_disabled: z.boolean().default(false),
   expiry_date: z.coerce.date().optional().nullable(),

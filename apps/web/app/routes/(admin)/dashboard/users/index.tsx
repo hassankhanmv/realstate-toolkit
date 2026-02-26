@@ -472,14 +472,22 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
         </div>
 
         {/* Global Data Table */}
-        <GlobalDataTable
-          data={tableData}
-          headers={headers}
-          title={"dashboard.nav.users"}
-          description={"users.description"}
-          contextMenuOptions={contextMenuOptions}
-          massContextMenu={massActions}
-        />
+        <div className="space-y-4">
+          {currentUser?.profile?.company_name && (
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-muted/30 px-4 py-2 rounded-lg border border-border/40 w-fit">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              {currentUser.profile.company_name} Workspace
+            </div>
+          )}
+          <GlobalDataTable
+            data={tableData}
+            headers={headers}
+            title={"dashboard.nav.users"}
+            description={"users.description"}
+            contextMenuOptions={contextMenuOptions}
+            massContextMenu={massActions}
+          />
+        </div>
       </div>
 
       <UserForm

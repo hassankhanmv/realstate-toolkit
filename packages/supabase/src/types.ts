@@ -6,6 +6,7 @@ export type Database = {
           id: string;
           full_name: string | null;
           company_name: string | null;
+          admin_id: string | null;
           avatar_url: string | null;
           created_at: string;
           role: string | null;
@@ -18,6 +19,7 @@ export type Database = {
           id: string;
           full_name?: string | null;
           company_name?: string | null;
+          admin_id?: string | null;
           avatar_url?: string | null;
           created_at?: string;
           role?: string | null;
@@ -30,6 +32,7 @@ export type Database = {
           id?: string;
           full_name?: string | null;
           company_name?: string | null;
+          admin_id?: string | null;
           avatar_url?: string | null;
           created_at?: string;
           role?: string | null;
@@ -43,6 +46,7 @@ export type Database = {
         Row: {
           id: string;
           broker_id: string;
+          company_id: string | null;
           title: string;
           price: number;
           description: string | null;
@@ -75,6 +79,7 @@ export type Database = {
         Insert: {
           id?: string;
           broker_id: string;
+          company_id?: string | null;
           title: string;
           price: number;
           description?: string | null;
@@ -107,6 +112,7 @@ export type Database = {
         Update: {
           id?: string;
           broker_id?: string;
+          company_id?: string | null;
           title?: string;
           price?: number;
           description?: string | null;
@@ -141,6 +147,7 @@ export type Database = {
         Row: {
           id: string;
           broker_id: string;
+          company_id: string | null;
           property_id: string | null;
           name: string;
           phone: string | null;
@@ -155,6 +162,7 @@ export type Database = {
         Insert: {
           id?: string;
           broker_id: string;
+          company_id?: string | null;
           property_id?: string | null;
           name: string;
           phone?: string | null;
@@ -169,6 +177,7 @@ export type Database = {
         Update: {
           id?: string;
           broker_id?: string;
+          company_id?: string | null;
           property_id?: string | null;
           name?: string;
           phone?: string | null;

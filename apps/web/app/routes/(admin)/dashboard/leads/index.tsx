@@ -3,8 +3,8 @@ import { data, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import { useLoaderData, useNavigation, Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
-  getLeadsByBroker,
-  getPropertiesByBroker,
+  getLeadsByCompany,
+  getPropertiesByCompany,
   type Lead,
 } from "@repo/supabase";
 import Papa from "papaparse";
@@ -89,16 +89,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
     const propertyId = url.searchParams.get("propertyId");
 
+    const companyId = user.profile?.admin_id || user.id;
+
     let leads = [];
-    const allLeads = await getLeadsByBroker(supabase, user.id);
+    const allLeads = await getLeadsByCompany(supabase, companyId);
 
     if (propertyId) {
-      leads = allLeads.filter((lead) => lead.property_id === propertyId);
+      leads = allLeads.filter((lead: any) => lead.property_id === propertyId);
     } else {
       leads = allLeads;
     }
 
-    const allProperties = await getPropertiesByBroker(supabase, user.id);
+    const allProperties = await getPropertiesByCompany(supabase, companyId);
     const properties = allProperties.map((p: any) => ({
       id: p.id,
       title: p.title,

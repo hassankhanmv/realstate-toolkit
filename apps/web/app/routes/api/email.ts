@@ -8,6 +8,7 @@ import {
   getLeadStatusChangeEmail,
   getLeadDeletedEmail,
   getFollowUpReminderEmail,
+  getLoginNotificationEmail,
 } from "@repo/email";
 
 /**
@@ -22,6 +23,7 @@ const TEMPLATES: Record<string, (d: any) => { subject: string; html: string }> =
     "lead-status-change": getLeadStatusChangeEmail,
     "lead-deleted": getLeadDeletedEmail,
     "follow-up-reminder": getFollowUpReminderEmail,
+    "login-notification": getLoginNotificationEmail,
   };
 
 /**

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   Link,
@@ -16,6 +16,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AuthLayout } from "@/components/layouts/AuthLayout";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { getSupabaseServer } from "@/lib/supabase.server";
@@ -49,14 +56,18 @@ export const meta: Route.MetaFunction = () => {
 
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
-  const name = formData.get("name") as string;
+  const full_name = formData.get("name") as string;
   const email = formData.get("email") as string;
+  const role = formData.get("role") as string;
+  const company_name = formData.get("company_name") as string | null;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 
   const validation = signupSchema.safeParse({
-    name,
+    full_name,
     email,
+    role,
+    company_name,
     password,
     confirmPassword,
   });
@@ -70,7 +81,16 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const { data: authData, error } = await signUpUser(supabase, {
     email,
     password,
-    options: { data: { full_name: name } },
+    options: {
+      data: {
+        full_name,
+        role: validation.data.role,
+        company_name:
+          validation.data.role === "company_owner"
+            ? validation.data.company_name
+            : undefined,
+      },
+    },
   });
 
   if (error) {
@@ -91,14 +111,17 @@ export default function Signup() {
   const submit = useSubmit();
   const dispatch = useDispatch();
 
+  const [role, setRole] = useState<"company_owner" | "buyer" | "">("");
+
   const isSubmitting = navigation.state === "submitting";
 
   useEffect(() => {
     if (actionData?.error) {
+      const translatedError = t(actionData.error) || actionData.error;
       toast.error(t("error"), {
-        description: actionData.error,
+        description: translatedError,
       });
-      dispatch(setError(actionData.error));
+      dispatch(setError(translatedError));
     } else if (actionData?.success) {
       toast.success(t("success"), {
         description: "Account created! Redirecting...",
@@ -149,6 +172,40 @@ export default function Signup() {
                     required
                   />
                 </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="role">Account Type</Label>
+                  <Select
+                    name="role"
+                    value={role}
+                    onValueChange={(val: any) => setRole(val)}
+                    required
+                  >
+                    <SelectTrigger id="role" className="w-full">
+                      <SelectValue placeholder="Select account type..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="company_owner">
+                        Broker / Company
+                      </SelectItem>
+                      <SelectItem value="buyer">Buyer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {role === "company_owner" && (
+                  <div className="grid gap-2 animate-in fade-in zoom-in-95 duration-200">
+                    <Label htmlFor="company_name">Company Name</Label>
+                    <Input
+                      id="company_name"
+                      name="company_name"
+                      placeholder="Enter your brokerage or company name"
+                      type="text"
+                      disabled={isSubmitting}
+                      required
+                    />
+                  </div>
+                )}
                 <div className="grid gap-2">
                   <Label htmlFor="password">{t("signup.password_label")}</Label>
                   <PasswordInput

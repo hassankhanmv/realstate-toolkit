@@ -5,7 +5,7 @@ import {
 } from "react-router";
 import { getSupabaseServer } from "@/lib/supabase.server";
 import {
-  getLeadsByBroker,
+  getLeadsByCompany,
   createLead,
   bulkUpdateLeads,
   bulkDeleteLeads,
@@ -23,8 +23,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return data({ error: "Unauthorized" }, { status: 401, headers });
   }
 
+  const { data: profile } = await (supabase.from("profiles") as any)
+    .select("admin_id")
+    .eq("id", user.id)
+    .single();
+
+  const companyId = profile?.admin_id || user.id;
+
   try {
-    const leads = await getLeadsByBroker(supabase, user.id);
+    const leads = await getLeadsByCompany(supabase, companyId);
     return data({ data: leads }, { headers });
   } catch (error: any) {
     return data({ error: error.message }, { status: 500, headers });
@@ -57,6 +64,18 @@ export async function action({ request }: ActionFunctionArgs) {
       }
       // Set broker_id to current user
       body.broker_id = user.id;
+
+      let companyId = user.id;
+      const { data: profile } = await (supabase.from("profiles") as any)
+        .select("admin_id")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        companyId = profile.admin_id || user.id;
+      }
+
+      body.company_id = companyId;
 
       const newLead = await createLead(supabase, body);
 

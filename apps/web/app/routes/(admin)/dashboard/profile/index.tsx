@@ -1,5 +1,4 @@
 import type { Route } from "./+types/index";
-import { getSupabaseServer } from "@/lib/supabase.server";
 import { data, useNavigation } from "react-router";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
@@ -7,12 +6,10 @@ import { useDispatch } from "react-redux";
 import { setUser } from "~/store/slices/authSlice";
 import { setLoading } from "~/store/slices/uiSlice";
 import { useEffect } from "react";
+import { requireAuth } from "~/lib/auth.server";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-  const { supabase, headers } = getSupabaseServer(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, headers } = await requireAuth(request);
 
   if (!user) {
     return data(null, { status: 302, headers: { Location: "/login" } });

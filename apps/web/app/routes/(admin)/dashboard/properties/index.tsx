@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { Route } from "./+types/index";
 import { data, useNavigate, useNavigation, useRevalidator } from "react-router";
 import { useTranslation } from "react-i18next";
-import { getPropertiesByBroker, type Property } from "@repo/supabase";
+import { getPropertiesByCompany, type Property } from "@repo/supabase";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router";
@@ -70,8 +70,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     throw err;
   });
 
+  const companyId = user.profile?.admin_id || user.id;
+
   try {
-    const properties = await getPropertiesByBroker(supabase, user.id);
+    const properties = await getPropertiesByCompany(supabase, companyId);
     return data(
       { properties: properties ?? [], error: null, user },
       { headers },
