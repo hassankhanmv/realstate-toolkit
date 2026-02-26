@@ -32,7 +32,12 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { formatTimeAgo } from "@/lib/utils";
 import type { Profile } from "@repo/supabase";
 import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "~/store/slices/authSlice";
+import {
+  selectCanCreateUser,
+  selectCanDeleteUser,
+  selectCanEditUser,
+  setUser,
+} from "~/store/slices/authSlice";
 import { setLoading, setTableLoading } from "~/store/slices/uiSlice";
 import StatCard from "~/components/global/StatCard";
 import type { RootState } from "~/store/store";
@@ -106,6 +111,7 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
   const { users, error, currentUser } = loaderData;
   const { t } = useTranslation();
   const navigate = useNavigate();
+
   const revalidator = useRevalidator();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<
@@ -130,8 +136,12 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
 
-  // Set user in redux store (in useEffect to avoid setting state during render)
+  const canCreate = useSelector(selectCanCreateUser);
+  const canEdit = useSelector(selectCanEditUser);
+  const canDelete = useSelector(selectCanDeleteUser);
+
   useEffect(() => {
     if (currentUser) {
       dispatch(setUser(currentUser));
@@ -139,12 +149,8 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
   }, [currentUser, dispatch]);
 
   useEffect(() => {
-    if (revalidator.state === "loading" || navigation.state === "loading") {
-      dispatch(setTableLoading(true));
-    } else {
-      dispatch(setTableLoading(false));
-    }
-  }, [revalidator.state, navigation.state, dispatch]);
+    dispatch(setLoading(isLoading));
+  }, [isLoading, dispatch]);
 
   // Headers configuration
   const headers: HeaderConfig<any>[] = useMemo(
@@ -387,6 +393,7 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
         title: "users.actions.edit",
         icon: <Pencil className="h-4 w-4" />,
         onClick: () => handleEdit(rowOriginal),
+        permission: () => canEdit,
       },
       {
         id: 2,
@@ -405,12 +412,14 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
           <UserX className="h-4 w-4" />
         ),
         onClick: () => handleDisablePrompt(rowOriginal),
+        permission: () => canEdit,
       },
       {
         id: 4,
         title: "Reset Password",
         icon: <LockKeyhole className="h-4 w-4" />,
         onClick: () => handleResetPasswordPrompt(rowOriginal),
+        permission: () => canEdit,
       },
       {
         id: 5,
@@ -418,9 +427,10 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
         icon: <Trash2 className="h-4 w-4" />,
         onClick: () => handleDeletePrompt(rowOriginal),
         destructive: true,
+        permission: () => canDelete,
       },
     ],
-    [navigate],
+    [navigate, canEdit, canDelete],
   );
 
   const massActions: ContextMenuOption[] = useMemo(
@@ -433,6 +443,7 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
           setSelectedUser(undefined);
           setModalOpen(true);
         },
+        permission: () => canCreate,
       },
       {
         id: 2,
@@ -443,7 +454,7 @@ export default function UsersPage({ loaderData }: Route.ComponentProps) {
         },
       },
     ],
-    [revalidator],
+    [revalidator, canCreate],
   );
 
   return (

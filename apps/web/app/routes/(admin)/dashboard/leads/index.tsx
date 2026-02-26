@@ -62,8 +62,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DashboardLayout } from "~/components/layouts/DashboardLayout";
-import { setUser } from "~/store/slices/authSlice";
-import { useDispatch } from "react-redux";
+import {
+  selectCanCreateLead,
+  selectCanDeleteLead,
+  selectCanEditLead,
+  setUser,
+} from "~/store/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "~/store/slices/uiSlice";
 import { toast } from "sonner";
 
@@ -142,14 +147,18 @@ export default function LeadsPage() {
   const isLoading = navigation.state === "loading";
   const revalidator = useRevalidator();
 
-  useEffect(() => {
-    dispatch(setLoading(isLoading));
-  }, [isLoading, dispatch]);
+  const canCreate = useSelector(selectCanCreateLead);
+  const canEdit = useSelector(selectCanEditLead);
+  const canDelete = useSelector(selectCanDeleteLead);
+
   useEffect(() => {
     if (user) {
       dispatch(setUser(user));
     }
   }, [user, dispatch]);
+  useEffect(() => {
+    dispatch(setLoading(isLoading));
+  }, [isLoading, dispatch]);
 
   // State
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -173,9 +182,14 @@ export default function LeadsPage() {
   };
 
   const totalLeads = leads?.length || 0;
-  const openLeads =
-    leads?.filter((l) => !["Won", "Lost"].includes(l.status)).length || 0;
-  const closedWon = leads?.filter((l) => l.status === "Won").length || 0;
+  const openLeads = useMemo(
+    () => leads?.filter((l) => !["Won", "Lost"].includes(l.status)).length || 0,
+    [leads],
+  );
+  const closedWon = useMemo(
+    () => leads?.filter((l) => l.status === "Won").length || 0,
+    [leads],
+  );
 
   // Selection helpers
   const toggleSelect = useCallback((id: string) => {
@@ -300,56 +314,57 @@ export default function LeadsPage() {
   };
 
   // Action options per row
-  const getActionOptions = useCallback((lead: any): ContextMenuOption[] => {
-    const options: ContextMenuOption[] = [
+  const getActionOptions = useCallback(
+    (lead: any): ContextMenuOption[] => [
       {
         id: 1,
         title: "leads.actions.view",
         icon: <Eye className="h-4 w-4" />,
         onClick: () => handleOpenForm(lead),
+        permission: () => canEdit,
       },
-    ];
-
-    if (lead.phone) {
-      options.push({
-        id: 2,
-        title: "leads.actions.whatsapp",
-        onClick: () =>
-          window.open(
-            `https://wa.me/${lead.phone!.replace(/[^0-9]/g, "")}`,
-            "_blank",
-          ),
-        icon: <MessageCircle className="h-4 w-4" />,
-      });
-      options.push({
-        id: 3,
-        title: "leads.actions.call",
-        onClick: () => window.open(`tel:${lead.phone}`),
-        icon: <Phone className="h-4 w-4" />,
-      });
-    }
-
-    if (lead.email) {
-      options.push({
-        id: 4,
-        title: "leads.actions.email",
-        onClick: () => window.open(`mailto:${lead.email}`),
-        icon: <Mail className="h-4 w-4" />,
-      });
-    }
-
-    // Delete option (destructive, at the end)
-    options.push({
-      id: 10,
-      title: "leads.actions.delete",
-      icon: <Trash2 className="h-4 w-4" />,
-      destructive: true,
-      separator: true,
-      onClick: () => setDeleteId(lead.id),
-    });
-
-    return options;
-  }, []);
+      ...(lead.phone
+        ? [
+            {
+              id: 2,
+              title: "leads.actions.whatsapp",
+              onClick: () =>
+                window.open(
+                  `https://wa.me/${lead.phone!.replace(/[^0-9]/g, "")}`,
+                  "_blank",
+                ),
+              icon: <MessageCircle className="h-4 w-4" />,
+            },
+            {
+              id: 3,
+              title: "leads.actions.call",
+              onClick: () => window.open(`tel:${lead.phone}`),
+              icon: <Phone className="h-4 w-4" />,
+            },
+          ]
+        : []),
+      ...(lead.email
+        ? [
+            {
+              id: 4,
+              title: "leads.actions.email",
+              onClick: () => window.open(`mailto:${lead.email}`),
+              icon: <Mail className="h-4 w-4" />,
+            },
+          ]
+        : []),
+      {
+        id: 10,
+        title: "leads.actions.delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        destructive: true,
+        separator: true,
+        onClick: () => setDeleteId(lead.id),
+        permission: () => canDelete,
+      },
+    ],
+    [canEdit, canDelete, handleOpenForm],
+  );
 
   const columns: HeaderConfig<Lead>[] = useMemo(
     () => [

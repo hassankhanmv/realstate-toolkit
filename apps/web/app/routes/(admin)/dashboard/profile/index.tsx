@@ -33,13 +33,13 @@ export default function ProfilePage({ loaderData }: Route.ComponentProps) {
   const { user } = loaderData;
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
 
   useEffect(() => {
-    dispatch(setUser(user));
-  }, [dispatch, user]);
-
-  const isLoading = navigation.state === "loading";
-  // Set user in redux store (in useEffect to avoid setting state during render)
+    if (user) {
+      dispatch(setUser(user));
+    }
+  }, [user, dispatch]);
   useEffect(() => {
     dispatch(setLoading(isLoading));
   }, [isLoading, dispatch]);
