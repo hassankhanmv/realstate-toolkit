@@ -72,9 +72,17 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       },
     );
 
-    const { data: authUsers } = await adminAuthClient.auth.admin.listUsers({
-      perPage: 1000,
-    });
+    const { data: authUsers, error: adminError } =
+      await adminAuthClient.auth.admin.listUsers({
+        perPage: 1000,
+      });
+
+    if (adminError) {
+      console.error(
+        "[Users Loader] Failed to fetch auth users via Admin API:",
+        adminError,
+      );
+    }
     const emailMap = new Map(
       authUsers?.users.map((u) => [u.id, u.email]) || [],
     );
