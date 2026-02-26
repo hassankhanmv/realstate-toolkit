@@ -32,3 +32,8 @@ export {
   getAccountDisabledEmail,
   type AccountDisabledEmailData,
 } from "./templates/account-disabled.js";
+export {
+  getLoginNotificationEmail,
+  type LoginNotificationEmailData,
+} from "./templates/login-notification.js";
+export { getPasswordResetRequestEmail } from "./templates/password-reset-request.js";

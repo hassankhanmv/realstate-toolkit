@@ -51,10 +51,11 @@ export const Sidebar = memo(
     }, [collapsed, onCollapsedChange]);
 
     const companyName = useMemo(() => {
-      return user?.user_metadata?.company_name
-        ? user.user_metadata.company_name
-        : "U";
-    }, [user?.user_metadata?.company_name]);
+      return (
+        user?.user_metadata?.company_name ?? user?.profile?.company_name ?? "U"
+      );
+    }, [user?.user_metadata?.company_name, user?.profile?.company_name]);
+
 
     return (
       <>

@@ -19,6 +19,17 @@ import { toast } from "sonner";
 import type { RootState } from "@/store/store";
 import { Mail, User, Building2, KeyRound } from "lucide-react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+
 interface ProfileFormData {
   name: string;
   company_name: string;
@@ -38,17 +49,31 @@ export function ProfileForm() {
     formState: { errors, isDirty },
   } = useForm<ProfileFormData>({
     defaultValues: {
-      name: user?.user_metadata?.full_name || "",
-      company_name: user?.user_metadata?.company_name || "",
+      name: user?.profile?.full_name || user?.user_metadata?.full_name || "",
+      company_name:
+        user?.profile?.company_name || user?.user_metadata?.company_name || "",
     },
+  });
+
+  const [isResetDialogVisible, setIsResetDialogVisible] = useState(false);
+  const [resetNote, setResetNote] = useState("");
+  const [isRequestingReset, setIsRequestingReset] = useState(false);
+
+  // Check if current user is a managed child agent
+  const isManagedAgent = user?.profile?.admin_id != null;
+
+  const [passwordForm, setPasswordForm] = useState({
+    password: "",
+    confirmPassword: "",
   });
 
   // Reset form values when user data is loaded from Redux
   useEffect(() => {
-    if (user?.user_metadata) {
+    if (user) {
       reset({
-        name: user.user_metadata.full_name || "",
-        company_name: user.user_metadata.company_name || "",
+        name: user.profile?.full_name || user.user_metadata?.full_name || "",
+        company_name:
+          user.profile?.company_name || user.user_metadata?.company_name || "",
       });
     }
   }, [user, reset]);
@@ -63,18 +88,41 @@ export function ProfileForm() {
     }
 
     try {
-      const { data: updatedUser, error } = await supabase.auth.updateUser({
-        data: {
+      // 1. Update SQL profiles table
+      const { error: profileError } = await (supabase.from("profiles") as any)
+        .update({
           full_name: data.name,
-          company_name: data.company_name,
-        },
-      });
+          company_name: data.company_name, // Even if disabled, this tracks Admin input logic
+        })
+        .eq("id", user!.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // 2. Sync Auth metadata
+      const { data: updatedUser, error: authError } =
+        await supabase.auth.updateUser({
+          data: {
+            full_name: data.name,
+            company_name: data.company_name,
+          },
+        });
+
+      if (authError) throw authError;
 
       if (updatedUser.user) {
-        dispatch(setUser(updatedUser.user));
+        // Hydrate UI State through redux
+        dispatch(
+          setUser({
+            ...updatedUser.user,
+            profile: {
+              ...user!.profile,
+              full_name: data.name,
+              company_name: data.company_name,
+            } as any,
+          }),
+        );
         toast.success(t("profile.success_message"));
+        reset(data); // Clear dirty state
       }
     } catch (error) {
       console.error("Profile update error:", error);
@@ -84,8 +132,21 @@ export function ProfileForm() {
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!user?.email) return;
+  const handleResetPassword = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    if (!user) return;
+
+    if (passwordForm.password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (passwordForm.password !== passwordForm.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
 
     setIsResettingPassword(true);
     const supabase = getSupabaseBrowser();
@@ -96,18 +157,49 @@ export function ProfileForm() {
     }
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.password,
       });
 
       if (error) throw error;
 
       toast.success(t("profile.reset_password_success"));
+      setPasswordForm({ password: "", confirmPassword: "" });
     } catch (error) {
       console.error("Password reset error:", error);
       toast.error(t("profile.reset_password_error"));
     } finally {
       setIsResettingPassword(false);
+    }
+  };
+
+  const handleRequestPasswordReset = async () => {
+    if (!user) return;
+    setIsRequestingReset(true);
+
+    try {
+      const response = await fetch("/api/users/request-password-reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ note: resetNote }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("profile.request_reset_error"));
+      }
+
+      toast.success(data.message || t("profile.request_reset_success"));
+      setIsResetDialogVisible(false);
+      setResetNote("");
+    } catch (error: any) {
+      console.error("Password reset request error:", error);
+      toast.error(error.message || t("profile.request_reset_error"));
+    } finally {
+      setIsRequestingReset(false);
     }
   };
 
@@ -155,6 +247,15 @@ export function ProfileForm() {
                 type="text"
                 placeholder={t("profile.company_placeholder")}
                 {...register("company_name")}
+                disabled={isManagedAgent}
+                className={
+                  isManagedAgent ? "bg-slate-50 cursor-not-allowed" : ""
+                }
+                title={
+                  isManagedAgent
+                    ? "Company name is locked by your administrator"
+                    : ""
+                }
               />
             </div>
 
@@ -197,16 +298,109 @@ export function ProfileForm() {
           <CardDescription>{t("profile.reset_password_desc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            variant="outline"
-            onClick={handleResetPassword}
-            disabled={isResettingPassword}
-            className="w-full md:w-auto"
-          >
-            {isResettingPassword
-              ? t("profile.resetting_password")
-              : t("profile.reset_password_button")}
-          </Button>
+          {isManagedAgent ? (
+            <Dialog
+              open={isResetDialogVisible}
+              onOpenChange={setIsResetDialogVisible}
+            >
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full md:w-auto">
+                  {t("profile.request_reset_title")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("profile.request_reset_title")}</DialogTitle>
+                  <DialogDescription>
+                    {t("profile.request_reset_desc")}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <Textarea
+                    placeholder={t("profile.request_reset_note_placeholder")}
+                    value={resetNote}
+                    onChange={(e) => setResetNote(e.target.value)}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsResetDialogVisible(false)}
+                  >
+                    {t("common.cancel")}
+                  </Button>
+                  <Button
+                    onClick={handleRequestPasswordReset}
+                    disabled={isRequestingReset}
+                  >
+                    {isRequestingReset
+                      ? t("profile.sending_request_button")
+                      : t("profile.send_request_button")}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <form
+              onSubmit={handleResetPassword}
+              className="space-y-4 max-w-sm ml-0"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Enter new password"
+                  value={passwordForm.password}
+                  onChange={(e) =>
+                    setPasswordForm((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
+                  disabled={isResettingPassword}
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm-new-password">Confirm Password</Label>
+                <Input
+                  id="confirm-new-password"
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordForm((prev) => ({
+                      ...prev,
+                      confirmPassword: e.target.value,
+                    }))
+                  }
+                  disabled={isResettingPassword}
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                variant="outline"
+                disabled={
+                  isResettingPassword ||
+                  !passwordForm.password ||
+                  !passwordForm.confirmPassword
+                }
+                className="w-full md:w-auto"
+              >
+                {isResettingPassword
+                  ? t("profile.resetting_password")
+                  : t("profile.reset_password_button")}
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

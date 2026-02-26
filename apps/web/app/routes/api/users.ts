@@ -12,12 +12,31 @@ export async function loader({ request }: LoaderFunctionArgs) {
   } = await supabase.auth.getUser();
   if (authError || !authUser) throw data("Unauthorized", { status: 401 });
 
+  // Lookup the authenticated user's profile to extract their company scope
+  const { data: authProfileData, error: profileError } = await supabase
+    .from("profiles")
+    .select("company_name")
+    .eq("id", authUser.id)
+    .single();
+
+  const authProfile =
+    authProfileData as unknown as import("@repo/supabase").Profile;
+
+  if (profileError || !authProfile?.company_name) {
+    return data(
+      { error: "Company context not found for your account" },
+      { status: 403 },
+    );
+  }
+
   // In production, limit fields to prevent leaking sensitive hashes
+  // Filter by the authenticating user's company namespace
   const { data: users, error } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, email, role, is_disabled, expiry_date, permissions, notifications, created_at",
+      "id, full_name, email, role, is_disabled, expiry_date, permissions, notifications, created_at, company_name",
     )
+    .eq("company_name", authProfile.company_name)
     .neq("id", authUser.id)
     .order("created_at", { ascending: false });
 
@@ -47,6 +66,25 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     const validatedData = userFormSchema.parse(rawData);
+
+    const { data: adminProfileData, error: adminProfileError } = await supabase
+      .from("profiles")
+      .select("company_name")
+      .eq("id", authUser.id)
+      .single();
+
+    const adminProfile =
+      adminProfileData as unknown as import("@repo/supabase").Profile;
+
+    // Fallback to reading company_name from Auth Metadata if DB profile fails
+    const resolvedCompanyName =
+      adminProfile?.company_name || authUser.user_metadata?.company_name;
+
+    if (!resolvedCompanyName) {
+      throw new Error(
+        "Unable to identify your company namespace for assignment.",
+      );
+    }
 
     // Initialize an admin client to bypass RLS and prevent the current admin session from logging out
     const { createClient } = await import("@supabase/supabase-js");
@@ -78,9 +116,11 @@ export async function action({ request }: ActionFunctionArgs) {
     const userId = authData?.user?.id;
     if (!userId) throw new Error("Failed to create user auth record");
 
-    // Second: Insert profile fields
+    // Second: Insert profile fields securely locked entirely to the Admin's namespace
     const updatePayload: Database["public"]["Tables"]["profiles"]["Update"] = {
       role: validatedData.role,
+      company_name: resolvedCompanyName, // Permanent tenant isolation linkage
+      admin_id: authUser.id, // Direct company owner hierarchy
       is_disabled: validatedData.is_disabled,
       expiry_date: validatedData.expiry_date
         ? new Date(validatedData.expiry_date).toISOString()

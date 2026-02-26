@@ -120,9 +120,13 @@
   "validation": {
     "invalid_email": "بريد إلكتروني غير صالح",
     "password_too_short": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "password_min": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
     "passwords_do_not_match": "كلمات المرور غير متطابقة",
+    "passwords_mismatch": "كلمات المرور غير متطابقة",
+    "company_name_required": "اسم الشركة مطلوب לחسابات الوسيط/الشركة",
     "required": "هذا الحقل مطلوب",
-    "name_min_length": "يجب أن يكون الاسم حرفين على الأقل"
+    "name_min_length": "يجب أن يكون الاسم حرفين على الأقل",
+    "full_name_min": "يجب أن يكون الاسم الكامل حرفين على الأقل"
   },
   "mobile": {
     "navigation": "التنقل",
@@ -143,6 +147,13 @@
     "resetting_password": "جارٍ الإرسال...",
     "reset_password_success": "تم إرسال بريد إعادة تعيين كلمة المرور بنجاح",
     "reset_password_error": "فشل إرسال بريد إعادة تعيين كلمة المرور",
+    "request_reset_title": "طلب إعادة تعيين كلمة المرور",
+    "request_reset_desc": "نظراً لأنك وكيل مُدار، يجب عليك طلب إعادة تعيين كلمة المرور من المسؤول. لا تتردد في ترك ملاحظة لهم أدناه.",
+    "request_reset_note_placeholder": "ملاحظة اختيارية توضح السبب...",
+    "request_reset_success": "تم إرسال طلب إعادة التعيين بنجاح إلى المسؤول.",
+    "request_reset_error": "تعذر إرسال طلب إعادة التعيين.",
+    "send_request_button": "إرسال الطلب",
+    "sending_request_button": "جاري إرسال الطلب...",
     "success_message": "تم تحديث الملف الشخصي بنجاح",
     "error_message": "فشل تحديث الملف الشخصي"
   },
@@ -232,6 +243,8 @@
       "Ready": "جاهز"
     },
     "errors": {
+      "invalid_price": "يجب أن يكون السعر أكبر من 0",
+      "notes_required": "الملاحظات مطلوبة",
       "fetch_failed": "فشل جلب العقارات",
       "create_failed": "فشل إنشاء العقار",
       "update_failed": "فشل تحديث العقار",
@@ -405,7 +418,8 @@
       "add_new": "إضافة جديد",
       "edit": "تعديل",
       "view_details": "عرض التفاصيل",
-      "disable": "تعطيل"
+      "disable": "تعطيل",
+      "enable": "تفعيل"
     },
     "stats": {
       "total": "إجمالي المستخدمين",

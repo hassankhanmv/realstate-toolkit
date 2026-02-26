@@ -11,7 +11,9 @@ export const signUpUser = async (
   data: {
     email: string;
     password: string;
-    options?: { data: { full_name: string; company_name?: string } };
+    options?: {
+      data: { full_name: string; company_name?: string | null; role?: string };
+    };
   },
 ) => {
   console.log("signUpUser called with:", data.email);

@@ -1,8 +1,9 @@
 import { data } from "react-router";
 import { getSupabaseServer } from "@/lib/supabase.server";
 
-import { signInUser } from "@repo/supabase";
+import { signInUser, type Profile } from "@repo/supabase";
 import { loginSchema } from "@/utils/validations/auth";
+import { sendEmail, getLoginNotificationEmail } from "@repo/email";
 import type { Route } from "./+types/login";
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -29,7 +30,6 @@ export const action = async ({ request }: Route.ActionArgs) => {
   if (error) {
     return data({ error: error.message }, { status: 400, headers });
   }
-
   return data({ user: authData.user }, { status: 200, headers });
 };
 

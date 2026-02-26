@@ -2,11 +2,10 @@ import type { Route } from "./+types/properties";
 import { data } from "react-router";
 import { getSupabaseServer } from "@/lib/supabase.server";
 import {
-  getPropertiesByBroker,
+  getPropertiesByCompany,
   createProperty,
   type PropertyInsert,
 } from "@repo/supabase";
-
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const { supabase, headers } = getSupabaseServer(request);
   const {
@@ -17,8 +16,16 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return data({ error: "Unauthorized" }, { status: 401, headers });
   }
 
+  // Get user profile to determine their root company_id (admin_id or their own id)
+  const { data: profile } = await (supabase.from("profiles") as any)
+    .select("admin_id")
+    .eq("id", user.id)
+    .single();
+
+  const companyId = profile?.admin_id || user.id;
+
   try {
-    const properties = await getPropertiesByBroker(supabase, user.id);
+    const properties = await getPropertiesByCompany(supabase, companyId);
     return data({ properties }, { headers });
   } catch (error) {
     console.error("Failed to fetch properties:", error);
@@ -61,12 +68,18 @@ export const action = async ({ request }: Route.ActionArgs) => {
       broker_id: user.id, // Enforce broker_id from auth
     } as PropertyInsert;
 
-    // Ensure profile exists to avoid FK error
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id")
+    // Ensure profile exists to avoid FK error, and resolve company_id
+    let finalCompanyId = user.id;
+    const { data: profile } = await (supabase.from("profiles") as any)
+      .select("id, admin_id")
       .eq("id", user.id)
       .single();
+
+    if (profile) {
+      finalCompanyId = profile.admin_id || user.id;
+    }
+
+    newPropertyData.company_id = finalCompanyId;
 
     if (!profile) {
       // console.log("Profile missing for user", user.id, "creating...");

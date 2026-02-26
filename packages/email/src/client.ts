@@ -43,6 +43,8 @@ export interface SendEmailOptions {
  * @throws Error if SMTP is not configured or delivery fails.
  */
 export async function sendEmail(options: SendEmailOptions) {
+  console.log("Sending email to:", options.to);
+
   const transport = getTransporter();
   const from =
     process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@example.com";

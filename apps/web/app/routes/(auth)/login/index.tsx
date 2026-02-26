@@ -9,7 +9,6 @@ import {
 } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +22,7 @@ import { signInUser } from "@repo/supabase";
 import { loginSchema } from "@/utils/validations/auth";
 import { setUser, setError } from "@/store/slices/authSlice";
 import type { Route } from "./+types/index";
+import { addToast } from "~/store/slices/uiSlice";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -69,6 +69,50 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return data({ error: error.message }, { status: 400, headers });
   }
 
+  try {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("notifications, full_name")
+      .eq("id", authData.user.id)
+      .single();
+
+    const profile = profileData as unknown as import("@repo/supabase").Profile;
+
+    if (profile) {
+      let notifications = profile.notifications;
+      if (typeof notifications === "string") {
+        try {
+          notifications = JSON.parse(notifications);
+        } catch (e) {}
+      }
+
+      if (notifications?.on_login) {
+        const { sendEmail, getLoginNotificationEmail } =
+          await import("@repo/email");
+        const { getClientIP, getClientDevice, getCurrentDateFormatted } =
+          await import("@/utils/client-info");
+
+        const ipAddress = getClientIP(request);
+        const userAgent = getClientDevice(request);
+        const dashBoardUrl = new URL("/dashboard", request.url).toString();
+
+        const { subject, html } = getLoginNotificationEmail({
+          userFullName: profile.full_name || "User",
+          loginTime: getCurrentDateFormatted(),
+          ipAddress,
+          deviceInfo: userAgent,
+          dashBoardUrl,
+        });
+
+        sendEmail({ to: email, subject, html }).catch((err) => {
+          console.error("Failed to send login notification email:", err);
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Error checking/sending login notification:", err);
+  }
+
   return data({ success: true, user: authData.user }, { status: 200, headers });
 };
 
@@ -87,14 +131,21 @@ export default function Login() {
 
   useEffect(() => {
     if (actionData?.error) {
-      toast.error(t("error"), {
-        description: actionData.error,
-      });
-      dispatch(setError(actionData.error));
+      const translatedError = t(actionData.error) || actionData.error;
+      dispatch(
+        addToast({
+          message: translatedError,
+          type: "error",
+        }),
+      );
+      dispatch(setError(translatedError));
     } else if (actionData?.success) {
-      toast.success(t("success"), {
-        description: "Login successful! Redirecting...",
-      });
+      dispatch(
+        addToast({
+          message: "Login successful! Redirecting...",
+          type: "success",
+        }),
+      );
       dispatch(setUser(actionData.user));
       setTimeout(() => {
         // window.location.href = "/dashboard";

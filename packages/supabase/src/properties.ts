@@ -1,15 +1,15 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, PropertyInsert, PropertyUpdate } from "./types";
 
-// Fetch all properties for a broker
-export const getPropertiesByBroker = async (
+// Fetch all properties for a company (tenant scope)
+export const getPropertiesByCompany = async (
   supabase: SupabaseClient<Database, "public">,
-  brokerId: string,
+  companyId: string,
 ) => {
   try {
     const { data, error } = await (supabase.from("properties") as any)
       .select("*")
-      .eq("broker_id", brokerId)
+      .eq("company_id", companyId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -32,15 +32,15 @@ export interface PropertyFilters {
   type?: string[];
 }
 
-export const getFilteredProperties = async (
+export const getFilteredPropertiesByCompany = async (
   supabase: SupabaseClient<Database, "public">,
-  brokerId: string,
+  companyId: string,
   filters: PropertyFilters,
 ) => {
   try {
     let query = (supabase.from("properties") as any)
       .select("*")
-      .eq("broker_id", brokerId);
+      .eq("company_id", companyId);
 
     if (filters.priceMin !== undefined) {
       query = query.gte("price", filters.priceMin);

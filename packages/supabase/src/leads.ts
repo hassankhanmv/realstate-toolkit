@@ -7,9 +7,9 @@ import type { Lead, LeadInsert, LeadUpdate } from "./types";
  * Joins with properties to get the property title
  * Orders by created_at descending
  */
-export async function getLeadsByBroker(
+export async function getLeadsByCompany(
   supabase: SupabaseClient<Database>,
-  brokerId: string,
+  companyId: string,
 ) {
   try {
     const { data, error } = await supabase
@@ -20,6 +20,7 @@ export async function getLeadsByBroker(
         properties ( title )
       `,
       )
+      .eq("company_id", companyId)
       .order("created_at", { ascending: false });
 
     if (error) throw error;

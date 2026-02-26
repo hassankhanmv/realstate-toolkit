@@ -262,7 +262,9 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div
+                  className={`grid ${user ? "grid-cols-1" : "grid-cols-2"} gap-4`}
+                >
                   <FormField
                     control={form.control}
                     name="email"
@@ -282,31 +284,28 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t("users.form.fields.password")}{" "}
-                          {user && (
-                            <span className="text-xs text-muted-foreground font-normal">
-                              {t("users.form.fields.password_help")}
-                            </span>
-                          )}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            autoComplete="new-password"
-                            {...field}
-                            className="h-9 rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {!user && (
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("users.form.fields.password")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              autoComplete="new-password"
+                              {...field}
+                              className="h-9 rounded-md border-border bg-transparent focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-accent"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-6">
