@@ -41,4 +41,27 @@ const authSlice = createSlice({
 
 export const { setUser, setLoading, setTableLoading, setError, resetAuth } =
   authSlice.actions;
+
+// Selectors
+export const selectCanCreateProperty = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.properties?.create;
+export const selectCanEditProperty = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.properties?.edit;
+export const selectCanDeleteProperty = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.properties?.delete;
+
+export const selectCanCreateLead = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.leads?.create;
+export const selectCanEditLead = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.leads?.edit;
+export const selectCanDeleteLead = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.leads?.delete;
+
+export const selectCanCreateUser = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.users?.create;
+export const selectCanEditUser = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.users?.edit;
+export const selectCanDeleteUser = (state: { auth: AuthState }) =>
+  !!state.auth.user?.profile?.permissions?.users?.delete;
+
 export default authSlice.reducer;

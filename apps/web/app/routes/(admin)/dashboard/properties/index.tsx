@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Route } from "./+types/index";
 import { data, useNavigate, useNavigation, useRevalidator } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -53,9 +53,15 @@ import { toast } from "sonner";
 import { DashboardLayout } from "~/components/layouts/DashboardLayout";
 import { Button } from "~/components/ui/button";
 import { useAppDispatch } from "~/store/hooks";
+import { useSelector } from "react-redux";
 import { setLoading, addToast } from "~/store/slices/uiSlice";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { setUser } from "~/store/slices/authSlice";
+import {
+  selectCanCreateProperty,
+  selectCanDeleteProperty,
+  selectCanEditProperty,
+  setUser,
+} from "~/store/slices/authSlice";
 
 import { requirePermission } from "@/lib/auth.server";
 
@@ -194,10 +200,6 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
 
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
-
-  useEffect(() => {
-    dispatch(setLoading(isLoading));
-  }, [isLoading, dispatch]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null,
@@ -206,18 +208,28 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
   const [isMaximized, setIsMaximized] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const totalProperties = properties.length;
-  const publishedProperties = properties.filter(
-    (p: Property) => p.is_published,
-  ).length;
-  const draftProperties = totalProperties - publishedProperties;
+  const canCreate = useSelector(selectCanCreateProperty);
+  const canEdit = useSelector(selectCanEditProperty);
+  const canDelete = useSelector(selectCanDeleteProperty);
 
-  // Set user in redux store (in useEffect to avoid setting state during render)
+  const totalProperties = properties.length;
+  const publishedProperties = useMemo(
+    () => properties.filter((p: Property) => p.is_published).length,
+    [properties],
+  );
+  const draftProperties = useMemo(
+    () => totalProperties - publishedProperties,
+    [totalProperties, publishedProperties],
+  );
+
   useEffect(() => {
     if (user) {
       dispatch(setUser(user));
     }
   }, [user, dispatch]);
+  useEffect(() => {
+    dispatch(setLoading(isLoading));
+  }, [isLoading, dispatch]);
 
   function openCreate() {
     setSelectedProperty(null);
@@ -513,50 +525,61 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
     },
   ];
 
-  const contextMenuOptions = (property: Property): ContextMenuOption[] => [
-    {
-      id: 1,
-      title: "properties.edit",
-      icon: <Pencil className="h-4 w-4" />,
-      onClick: () => openEdit(property),
-    },
-    {
-      id: 2,
-      title: "properties.view",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: () => openView(property),
-    },
-    {
-      id: 3,
-      title: "properties.open_detail",
-      icon: <ExternalLink className="h-4 w-4" />,
-      onClick: () => openDetail(property),
-    },
-    {
-      id: 4,
-      title: "properties.view_leads",
-      icon: <Users className="h-4 w-4" />,
-      onClick: () => {
-        navigate(`/dashboard/leads?propertyId=${property.id}`);
+  const contextMenuOptions = (property: Property): ContextMenuOption[] => {
+    const options: ContextMenuOption[] = [];
+
+    if (canEdit) {
+      options.push({
+        id: 1,
+        title: "properties.edit",
+        icon: <Pencil className="h-4 w-4" />,
+        onClick: () => openEdit(property),
+      });
+    }
+    options.push(
+      {
+        id: 2,
+        title: "properties.view",
+        icon: <Eye className="h-4 w-4" />,
+        onClick: () => openView(property),
       },
-    },
-    {
-      id: 5,
-      title: "properties.ai_description",
-      icon: <Sparkles className="h-4 w-4" />,
-      onClick: () => {
-        toast.info(t("properties.coming_soon"));
+      {
+        id: 3,
+        title: "properties.open_detail",
+        icon: <ExternalLink className="h-4 w-4" />,
+        onClick: () => openDetail(property),
       },
-    },
-    {
-      id: 6,
-      title: "properties.delete",
-      icon: <Trash2 className="h-4 w-4" />,
-      destructive: true,
-      separator: true,
-      onClick: () => setDeleteId(property.id),
-    },
-  ];
+      {
+        id: 4,
+        title: "properties.view_leads",
+        icon: <Users className="h-4 w-4" />,
+        onClick: () => {
+          navigate(`/dashboard/leads?propertyId=${property.id}`);
+        },
+      },
+      {
+        id: 5,
+        title: "properties.ai_description",
+        icon: <Sparkles className="h-4 w-4" />,
+        onClick: () => {
+          toast.info(t("properties.coming_soon"));
+        },
+      },
+    );
+
+    if (canDelete) {
+      options.push({
+        id: 6,
+        title: "properties.delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        destructive: true,
+        separator: true,
+        onClick: () => setDeleteId(property.id),
+      });
+    }
+
+    return options;
+  };
 
   const massContextMenu: ContextMenuOption[] = [
     {
@@ -565,13 +588,16 @@ export default function PropertiesPage({ loaderData }: Route.ComponentProps) {
       icon: <RefreshCw className="h-4 w-4" />,
       onClick: () => refreshList(),
     },
-    {
+  ];
+
+  if (canCreate) {
+    massContextMenu.push({
       id: 2,
       title: "common.table.add_new",
       icon: <Plus className="h-4 w-4" />,
       onClick: openCreate,
-    },
-  ];
+    });
+  }
 
   useEffect(() => {
     if (revalidator.state === "loading") {
