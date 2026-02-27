@@ -28,3 +28,13 @@ export const createMobileClient = (
 ) => {
   return createClient(supabaseUrl, supabaseAnonKey);
 };
+
+// ---------- ADMIN CLIENT (SERVICE ROLE) ----------
+export const createAdminClient = (
+  supabaseUrl: string,
+  serviceRoleKey: string,
+) => {
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+};

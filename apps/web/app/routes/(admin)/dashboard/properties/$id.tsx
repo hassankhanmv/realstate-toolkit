@@ -11,7 +11,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getSupabaseServer } from "@/lib/supabase.server";
 import { type Property, getLeadsByProperty, type Lead } from "@repo/supabase";
 import {
   propertySchema,
@@ -21,6 +20,7 @@ import {
 import { PropertyBasicInfo } from "~/components/properties/PropertyBasicInfo";
 import { PropertySpecs } from "~/components/properties/PropertySpecs";
 import { PropertyPublishing } from "~/components/properties/PropertyPublishing";
+import { PropertyMedia } from "~/components/properties/PropertyMedia";
 import { DashboardLayout } from "~/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,12 +30,6 @@ import {
   StatusBadgeCell,
   DateCell,
 } from "@/components/global/table/CellRenderers";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -52,9 +46,18 @@ import {
   MessageCircle,
   Mail,
   Phone,
+  ImagePlus,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useAppDispatch } from "~/store/hooks";
+import { useSelector } from "react-redux";
 import { setLoading, addToast } from "~/store/slices/uiSlice";
+import {
+  selectCanEditProperty,
+  selectCanDeleteProperty,
+  setUser,
+} from "~/store/slices/authSlice";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   GlobalDataTable,
@@ -62,14 +65,18 @@ import {
 } from "~/components/global/table/GlobalDataTable";
 import type { ContextMenuOption } from "~/components/global/table/ContextMenu";
 import { LeadForm } from "@/components/dashboard/leads/LeadForm";
+import { requirePermission } from "~/lib/auth.server";
 
 // ── Loader ──────────────────────────────────────────────────────────────────
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
-  const { supabase, headers } = getSupabaseServer(request);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, headers, user } = await requirePermission(
+    request,
+    "properties",
+    "view",
+  ).catch((err) => {
+    throw err;
+  });
 
   if (!user) throw data({ error: "Unauthorized" }, { status: 401, headers });
 
@@ -115,7 +122,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     },
   };
 
-  return data({ property, formData, leads: leads as any[] }, { headers });
+  return data({ property, formData, leads: leads as any[], user }, { headers });
 };
 
 export const meta: Route.MetaFunction = ({ data }) => {
@@ -156,17 +163,26 @@ export default function PropertyDetailPage({
   const dispatch = useAppDispatch();
   const navigate = useNavigate(); // For redirecting after delete
   const revalidator = useRevalidator();
-  const { property, formData, leads } = loaderData as any;
+  const { property, formData, leads, user } = loaderData as any;
 
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
 
   useEffect(() => {
+    if (user) {
+      dispatch(setUser(user));
+    }
+  }, [user, dispatch]);
+  useEffect(() => {
     dispatch(setLoading(isLoading));
   }, [isLoading, dispatch]);
 
   const [activeSection, setActiveSection] = useState("basic-info");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Delete dialog state
+
+  const canEdit = useSelector(selectCanEditProperty);
+  const canDelete = useSelector(selectCanDeleteProperty);
 
   // Leads state
   const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
@@ -182,10 +198,15 @@ export default function PropertyDetailPage({
   const onSubmit = async (values: PropertyFormValues) => {
     dispatch(setLoading(true));
     try {
+      const images = [
+        ...(values.media?.media_urls ?? []),
+        ...(values.media?.urls ?? []),
+      ];
       const flatData = {
         ...values.basicInfo,
         ...values.specifications,
         ...values.publishing,
+        images,
       };
 
       const res = await fetch(`/api/properties/${property.id}`, {
@@ -317,37 +338,41 @@ export default function PropertyDetailPage({
   );
 
   const getActionOptions = useCallback(
-    (row: any): ContextMenuOption[] => [
-      {
-        id: 1,
-        title: "properties.edit",
-        icon: <Eye className="h-4 w-4" />,
-        onClick: () => handleOpenLeadForm(row),
-      },
-      {
-        id: 2,
-        title: "leads.actions.whatsapp",
-        icon: <MessageCircle className="h-4 w-4" />,
-        onClick: () =>
-          row.phone && window.open(`https://wa.me/${row.phone}`, "_blank"),
-        disabled: !row.phone,
-      },
-      {
-        id: 3,
-        title: "leads.actions.call",
-        icon: <Phone className="h-4 w-4" />,
-        onClick: () => row.phone && window.open(`tel:${row.phone}`, "_self"),
-        disabled: !row.phone,
-      },
-      {
-        id: 4,
-        title: "leads.actions.email",
-        icon: <Mail className="h-4 w-4" />,
-        onClick: () => row.email && window.open(`mailto:${row.email}`, "_self"),
-        disabled: !row.email,
-      },
-    ],
-    [],
+    (row: any): ContextMenuOption[] => {
+      if (!canEdit) return [];
+      return [
+        {
+          id: 1,
+          title: "properties.edit",
+          icon: <Eye className="h-4 w-4" />,
+          onClick: () => handleOpenLeadForm(row),
+        },
+        {
+          id: 2,
+          title: "leads.actions.whatsapp",
+          icon: <MessageCircle className="h-4 w-4" />,
+          onClick: () =>
+            row.phone && window.open(`https://wa.me/${row.phone}`, "_blank"),
+          disabled: !row.phone,
+        },
+        {
+          id: 3,
+          title: "leads.actions.call",
+          icon: <Phone className="h-4 w-4" />,
+          onClick: () => row.phone && window.open(`tel:${row.phone}`, "_self"),
+          disabled: !row.phone,
+        },
+        {
+          id: 4,
+          title: "leads.actions.email",
+          icon: <Mail className="h-4 w-4" />,
+          onClick: () =>
+            row.email && window.open(`mailto:${row.email}`, "_self"),
+          disabled: !row.email,
+        },
+      ];
+    },
+    [canEdit],
   );
 
   const massContextMenu: ContextMenuOption[] = [
@@ -357,18 +382,23 @@ export default function PropertyDetailPage({
       icon: <RefreshCw className="h-4 w-4" />,
       onClick: () => revalidator.revalidate(),
     },
-    {
-      id: 2,
-      title: "common.table.add_new",
-      icon: <Plus className="h-4 w-4" />,
-      onClick: () => handleOpenLeadForm(),
-    },
+    ...(canEdit
+      ? [
+          {
+            id: 2,
+            title: "common.table.add_new",
+            icon: <Plus className="h-4 w-4" />,
+            onClick: () => handleOpenLeadForm(),
+          },
+        ]
+      : []),
   ];
 
   // Sidebar navigation sections
   const sections = [
     { id: "basic-info", label: t("properties.basics"), icon: Home },
     { id: "specifications", label: t("properties.details"), icon: Settings2 },
+    { id: "media", label: t("properties.media"), icon: ImagePlus },
     { id: "publishing", label: t("properties.publishing"), icon: Globe },
     { id: "leads", label: t("leads.title", "Leads"), icon: Users },
   ];
@@ -411,140 +441,194 @@ export default function PropertyDetailPage({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
-                className="h-9 px-4 font-medium"
+                className="h-9 px-4 font-medium cursor-pointer"
                 onClick={handleViewLive}
               >
                 <Eye className="h-4 w-4 me-2" />
                 {t("properties.view_live") || "View Live"}
               </Button>
-              <Button
-                type="submit"
-                className="h-9 px-6 font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
-              >
-                <Save className="h-4 w-4 me-2" />
-                {t("properties.save")}
-              </Button>
+              {canEdit && (
+                <Button
+                  type="submit"
+                  className="h-9 px-6 font-semibold bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer"
+                >
+                  <Save className="h-4 w-4 me-2" />
+                  {t("properties.save")}
+                </Button>
+              )}
             </div>
           </div>
 
           {/* ── Main Layout Grid ── */}
-          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr] gap-8 items-start">
+          <div
+            className={`grid grid-cols-1 ${
+              isSidebarOpen
+                ? "md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]"
+                : "md:grid-cols-[64px_1fr] lg:grid-cols-[64px_1fr]"
+            } gap-4 items-start transition-all duration-300 ease-in-out`}
+          >
             {/* Left Sidebar Navigation (Sticky) */}
-            <nav className="hidden md:flex flex-col sticky top-32 gap-1">
+            <nav className="hidden md:flex flex-col sticky top-32 gap-1 overflow-hidden bg-white rounded-lg p-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="mb-2 w-full self-start md:self-end text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+              >
+                {isSidebarOpen ? (
+                  <PanelLeftClose className="h-4 w-4" />
+                ) : (
+                  <PanelLeftOpen className="h-4 w-4" />
+                )}
+              </Button>
+
               {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
-                return (
+
+                const linkContent = (
                   <a
-                    key={section.id}
                     href={`#${section.id}`}
                     onClick={() => setActiveSection(section.id)}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
                         ? "bg-secondary text-foreground"
                         : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                    }`}
+                    } ${!isSidebarOpen ? "justify-center" : "justify-start"}`}
+                    title={!isSidebarOpen ? section.label : undefined}
                   >
                     <Icon
-                      className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                      className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : ""}`}
                     />
-                    {section.label}
+                    {isSidebarOpen && (
+                      <span className="truncate">{section.label}</span>
+                    )}
                   </a>
                 );
+
+                return linkContent;
               })}
             </nav>
 
             {/* Right Side Content Areas */}
-            <div className="flex flex-col gap-8 pb-20">
-              {/* Section 1: Basic Info */}
-              <Card
-                id="basic-info"
-                className="scroll-mt-32 border-border shadow-sm"
-              >
-                <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
-                  <CardTitle className="text-lg font-semibold">
-                    {t("properties.basics")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <PropertyBasicInfo form={form as any} />
-                </CardContent>
-              </Card>
+            <div
+              className={`flex flex-col gap-8 pb-20 overflow-x-hidden ${!canEdit ? "pointer-events-none opacity-90 grayscale-[10%]" : ""}`}
+            >
+              <fieldset disabled={!canEdit} className="contents">
+                {/* Section 1: Basic Info */}
+                <Card
+                  id="basic-info"
+                  className="scroll-mt-32 border-border shadow-sm"
+                >
+                  <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                    <CardTitle className="text-lg font-semibold">
+                      {t("properties.basics")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <PropertyBasicInfo form={form as any} />
+                  </CardContent>
+                </Card>
 
-              {/* Section 2: Specifications */}
-              <Card
-                id="specifications"
-                className="scroll-mt-32 border-border shadow-sm"
-              >
-                <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
-                  <CardTitle className="text-lg font-semibold">
-                    {t("properties.details")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <PropertySpecs form={form as any} />
-                </CardContent>
-              </Card>
+                {/* Section 2: Specifications */}
+                <Card
+                  id="specifications"
+                  className="scroll-mt-32 border-border shadow-sm"
+                >
+                  <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                    <CardTitle className="text-lg font-semibold">
+                      {t("properties.details")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <PropertySpecs form={form as any} />
+                  </CardContent>
+                </Card>
 
-              {/* Section 3: Publishing */}
-              <Card
-                id="publishing"
-                className="scroll-mt-32 border-border shadow-sm"
-              >
-                <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
-                  <CardTitle className="text-lg font-semibold">
-                    {t("properties.publishing")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <PropertyPublishing form={form as any} />
-                </CardContent>
-              </Card>
+                {/* Section 3: Media */}
+                <Card
+                  id="media"
+                  className="scroll-mt-32 border-border shadow-sm"
+                >
+                  <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                    <CardTitle className="text-lg font-semibold">
+                      {t("properties.media")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <PropertyMedia />
+                  </CardContent>
+                </Card>
+
+                {/* Section 4: Publishing */}
+                <Card
+                  id="publishing"
+                  className="scroll-mt-32 border-border shadow-sm"
+                >
+                  <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+                    <CardTitle className="text-lg font-semibold">
+                      {t("properties.publishing")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <PropertyPublishing form={form as any} />
+                  </CardContent>
+                </Card>
+              </fieldset>
 
               {/* Section 4: Leads */}
-              <Card id="leads" className="scroll-mt-32 border-border shadow-sm">
-                <CardContent className="p-6">
-                  <GlobalDataTable
-                    headers={leadsColumns}
-                    data={leads}
-                    title={t("leads.title")}
-                    search={true}
-                    contextMenuOptions={getActionOptions}
-                    massContextMenu={massContextMenu}
-                    noDataIcon={Users}
-                    noDataMessage="leads.no_leads"
-                    noDataDesc="leads.no_leads_desc"
-                  />
-                </CardContent>
-              </Card>
+              <div className="pointer-events-auto filter-none opacity-100">
+                <Card
+                  id="leads"
+                  className="scroll-mt-32 border-border shadow-sm !pointer-events-auto"
+                >
+                  <CardContent className="p-6">
+                    <GlobalDataTable
+                      headers={leadsColumns}
+                      data={leads}
+                      title={t("leads.title")}
+                      search={true}
+                      contextMenuOptions={getActionOptions}
+                      massContextMenu={massContextMenu}
+                      noDataIcon={Users}
+                      noDataMessage="leads.no_leads"
+                      noDataDesc="leads.no_leads_desc"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Danger Zone */}
-              <Card className="border-destructive/30 shadow-sm mt-8">
-                <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
-                  <div className="space-y-1">
-                    <p className="font-semibold text-foreground">
-                      {t("properties.danger_zone") || "Danger Zone"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {t("properties.delete_desc") ||
-                        "Permanently delete this property and all its associated data."}
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="shrink-0 font-semibold"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                  >
-                    <Trash2 className="h-4 w-4 me-2" />
-                    {t("properties.delete")}
-                  </Button>
-                </CardContent>
-              </Card>
+              {canDelete && (
+                <Card className="border-destructive/30 shadow-sm mt-8 pointer-events-auto opacity-100 filter-none">
+                  <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
+                    <div className="space-y-1">
+                      <p className="font-semibold text-foreground">
+                        {t("properties.danger_zone") || "Danger Zone"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("properties.delete_desc") ||
+                          "Permanently delete this property and all its associated data."}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="shrink-0 font-semibold"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="h-4 w-4 me-2" />
+                      {t("properties.delete")}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </form>

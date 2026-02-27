@@ -5,6 +5,7 @@ import {
   getPropertyById,
   updateProperty,
   deleteProperty,
+  createAdminClient,
   type PropertyUpdate,
 } from "@repo/supabase";
 import { sendEmail, getPropertyDeletedEmail } from "@repo/email";
@@ -19,6 +20,13 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     return data({ error: "Unauthorized" }, { status: 401, headers });
   }
 
+  const { data: profile } = await (supabase.from("profiles") as any)
+    .select("admin_id")
+    .eq("id", user.id)
+    .single();
+
+  const companyId = profile?.admin_id || user.id;
+
   const { id } = params;
   if (!id) {
     return data({ error: "Property ID required" }, { status: 400, headers });
@@ -28,7 +36,8 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const property = await getPropertyById(supabase, id);
 
     // Check ownership
-    if (property.broker_id !== user.id) {
+    const propCompanyId = property.company_id || property.broker_id;
+    if (propCompanyId !== companyId && property.broker_id !== user.id) {
       return data({ error: "Forbidden" }, { status: 403, headers });
     }
 
@@ -52,6 +61,13 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     return data({ error: "Unauthorized" }, { status: 401, headers });
   }
 
+  const { data: profile } = await (supabase.from("profiles") as any)
+    .select("admin_id")
+    .eq("id", user.id)
+    .single();
+
+  const companyId = profile?.admin_id || user.id;
+
   const { id } = params;
   if (!id) {
     return data({ error: "Property ID required" }, { status: 400, headers });
@@ -61,7 +77,8 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   let existing: any;
   try {
     existing = await getPropertyById(supabase, id);
-    if (existing.broker_id !== user.id) {
+    const propCompanyId = existing.company_id || existing.broker_id;
+    if (propCompanyId !== companyId && existing.broker_id !== user.id) {
       return data({ error: "Forbidden" }, { status: 403, headers });
     }
   } catch (e) {
@@ -69,19 +86,29 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   }
 
   try {
+    const adminSupabase = createAdminClient(
+      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+        process.env.VITE_SUPABASE_ANON_KEY!,
+    );
+
     if (request.method === "PUT") {
       const updateData = (await request.json()) as PropertyUpdate;
       // Prevent updating broker_id or id
       delete updateData.id;
       delete updateData.broker_id;
 
-      const updated = await updateProperty(supabase, id, updateData);
+      const updated = await updateProperty(
+        adminSupabase as any,
+        id,
+        updateData,
+      );
       return data({ property: updated }, { headers });
     }
 
     if (request.method === "DELETE") {
       const propertyTitle = existing.title || "Untitled Property";
-      await deleteProperty(supabase, id);
+      await deleteProperty(adminSupabase as any, id);
 
       // Send deletion notification email to the logged-in user
       if (user.email) {
@@ -105,7 +132,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
     console.error(`Failed to ${request.method} property ${id}:`, error);
     return data(
       {
-        error: `Failed to ${request.method === "DELETE" ? "delete" : "update"} property`,
+        error: `Failed to ${request.method === "DELETE" ? "delete" : "update"} property: ${error instanceof Error ? error.message : "Unknown error"}`,
       },
       { status: 500, headers },
     );
