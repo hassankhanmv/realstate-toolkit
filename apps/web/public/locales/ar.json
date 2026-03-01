@@ -44,7 +44,13 @@
     "password_placeholder": "أنشئ كلمة مرور",
     "confirm_password_label": "تأكيد كلمة المرور",
     "confirm_password_placeholder": "أكد كلمة المرور",
-    "submit_button": "إنشاء حساب"
+    "submit_button": "إنشاء حساب",
+    "account_type": "نوع الحساب",
+    "select_account_type": "اختر نوع الحساب...",
+    "role_broker": "وسيط / شركة",
+    "role_buyer": "مشتري",
+    "company_name": "اسم الشركة",
+    "company_placeholder": "أدخل اسم الوساطة أو الشركة"
   },
   "logout": "تسجيل الخروج",
   "email": "البريد الإلكتروني",
@@ -265,9 +271,7 @@
       "images_required": "الصور مطلوبة",
       "floor_required": "رقم الطابق مطلوب",
       "year_built_required": "سنة البناء مطلوبة",
-      "notes_required": "الملاحظات مطلوبة",
-      "image_required_published": "يجب أن يحتوي العقار المنشور على صورة واحدة على الأقل",
-      "invalid_price": "يجب أن يكون السعر أكبر من 0"
+      "image_required_published": "يجب أن يحتوي العقار المنشور على صورة واحدة على الأقل"
     },
     "hints": {
       "handover_date": "التاريخ المتوقع لتسليم العقار",
@@ -491,6 +495,182 @@
     "status": {
       "disabled": "معطل",
       "active": "نشط"
+    }
+  },
+  "portal": {
+    "nav": {
+      "brand": "العقارات",
+      "home": "الرئيسية",
+      "browse": "تصفح العقارات",
+      "favorites": "العقارات المحفوظة",
+      "profile": "ملفي الشخصي",
+      "login": "تسجيل الدخول",
+      "logout": "تسجيل الخروج",
+      "account": "الحساب",
+      "browse_short": "تصفح",
+      "saved_short": "المحفوظة",
+      "profile_short": "الملف"
+    },
+    "hero": {
+      "title": "جد عقار أحلامك",
+      "subtitle": "اكتشف عقارات متميزة في جميع أنحاء الإمارات. ابحث واحفظ وتواصل مع الوكلاء فوراً.",
+      "search_placeholder": "ابحث عن شقة غرفتين في دبي مارينا بأقل من 2 مليون درهم...",
+      "search_btn": "بحث"
+    },
+    "quick_filter": {
+      "for_sale": "للبيع",
+      "for_rent": "للإيجار",
+      "off_plan": "على الخارطة",
+      "villa": "فلل",
+      "apartment": "شقق"
+    },
+    "home": {
+      "featured_title": "عقارات مميزة",
+      "featured_subtitle": "قوائم مختارة بعناية لك",
+      "view_all": "عرض الكل ←",
+      "no_listings": "لا توجد قوائم بعد",
+      "no_listings_desc": "عد قريباً للعثور على عقارات جديدة.",
+      "stats": {
+        "listings": "قوائم نشطة",
+        "locations": "مواقع رئيسية",
+        "support": "دعم الوكلاء",
+        "rating": "تقييم العملاء"
+      }
+    },
+    "search": {
+      "placeholder": "البحث عن عقارات...",
+      "btn": "بحث",
+      "results_count": "تم العثور على {{count}} عقار",
+      "sort": "ترتيب حسب",
+      "sort_newest": "الأحدث",
+      "sort_price_low": "السعر: من الأقل للأعلى",
+      "sort_price_high": "السعر: من الأعلى للأقل",
+      "sort_beds": "غرف النوم",
+      "no_results": "لم يتم العثور على عقارات",
+      "no_results_desc": "حاول ضبط البحث أو الفلاتر للعثور على ما تبحث عنه.",
+      "prev": "السابق",
+      "next": "التالي",
+      "page_info": "صفحة {{page}} من {{totalPages}}"
+    },
+    "filters": {
+      "title": "الفلاتر",
+      "price_range": "نطاق السعر (درهم)",
+      "bedrooms": "غرف النوم",
+      "property_type": "نوع العقار",
+      "status": "الحالة",
+      "location": "الموقع",
+      "all_locations": "كل المواقع",
+      "apply": "تطبيق الفلاتر",
+      "clear": "مسح",
+      "bedroom_options": {
+        "studio": "ستوديو",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5_plus": "+5"
+      }
+    },
+    "property_types": {
+      "apartment": "شقة",
+      "villa": "فيلا",
+      "townhouse": "تاون هاوس",
+      "office": "مكتب",
+      "plot": "أرض",
+      "commercial": "تجاري"
+    },
+    "status": {
+      "for_sale": "للبيع",
+      "for_rent": "للإيجار",
+      "off-plan": "على الخارطة",
+      "ready": "جاهز"
+    },
+    "card": {
+      "beds": "غرف",
+      "baths": "حمامات",
+      "sqft": "قدم مربع",
+      "per_year": "/ سنوياً",
+      "currency": "درهم"
+    },
+    "locations": {
+      "dubai_marina": "دبي مارينا",
+      "downtown_dubai": "وسط مدينة دبي",
+      "palm_jumeirah": "نخلة جميرا",
+      "jumeirah_village_circle": "قرية جميرا الدائرية",
+      "business_bay": "خليج الأعمال",
+      "dubai_hills_estate": "دبي هيلز استيت",
+      "arabian_ranches": "المرابع العربية",
+      "difc": "مركز دبي المالي العالمي"
+    },
+    "detail": {
+      "back": "العودة للبحث",
+      "bedrooms": "غرف النوم",
+      "bathrooms": "الحمامات",
+      "area": "المساحة",
+      "year_built": "سنة البناء",
+      "description": "الوصف",
+      "amenities": "المرافق",
+      "details": "التفاصيل",
+      "furnished": "مفروش",
+      "floor": "الطابق",
+      "rera": "رقم ريرا",
+      "roi": "العائد المتوقع",
+      "handover": "التسليم",
+      "payment_plan": "خطة الدفع",
+      "similar": "عقارات مشابهة"
+    },
+    "favorites": {
+      "title": "العقارات المحفوظة",
+      "subtitle": "{{count}} عقار محفوظ",
+      "empty_title": "لا توجد عقارات محفوظة بعد",
+      "empty_desc": "ابدأ التصفح واضغط على أيقونة القلب لحفظ العقارات التي تنال إعجابك.",
+      "browse_btn": "تصفح العقارات",
+      "login_required": "سجل الدخول لحفظ العقارات",
+      "saved": "تم حفظ العقار!",
+      "removed": "تم إزالة العقار من المحفوظات",
+      "error": "فشل التحديث. حاول مرة أخرى.",
+      "save_aria": "حفظ العقار",
+      "remove_aria": "إزالة من المحفوظات"
+    },
+    "profile": {
+      "title": "ملفي الشخصي",
+      "subtitle": "معلومات حسابك",
+      "email": "البريد الإلكتروني",
+      "company": "الشركة",
+      "member_since": "عضو منذ",
+      "unnamed": "مستخدم بدون اسم",
+      "inquiry_history": "سجل الاستفسارات",
+      "inquiry_desc": "استفساراتك العقارية السابقة",
+      "no_inquiries": "لا توجد استفسارات بعد. تصفح العقارات وأرسل استفسارك الأول!"
+    },
+    "inquiry": {
+      "title": "هل أنت مهتم بهذا العقار؟",
+      "subtitle": "أرسل استفسارك وسيقوم أحد الوكلاء بالرد عليك.",
+      "name": "الاسم الكامل",
+      "name_placeholder": "اسمك",
+      "email": "البريد الإلكتروني",
+      "email_placeholder": "your@email.com",
+      "phone": "الهاتف",
+      "phone_placeholder": "+971 50 000 0000",
+      "message": "الرسالة",
+      "message_placeholder": "أخبرنا بما تبحث عنه...",
+      "default_message": "أنا مهتم بـ \"{{title}}\". يرجى إرسال المزيد من التفاصيل.",
+      "submit": "إرسال الاستفسار",
+      "success": "تم إرسال الاستفسار - تم إنشاء عميل في النظام! سيتصل بك وكيل قريباً.",
+      "error": "فشل إرسال الاستفسار. يرجى المحاولة مرة أخرى."
+    },
+    "footer": {
+      "brand": "العقارات",
+      "tagline": "جد عقارك المثالي في الإمارات. ابحث واحفظ واستفسر عن القوائم المتميزة.",
+      "quick_links": "روابط سريعة",
+      "property_types": "أنواع العقارات",
+      "contact": "اتصال",
+      "email": "info@realestate.ae",
+      "phone": "+971 4 000 0000",
+      "address": "دبي، الإمارات العربية المتحدة",
+      "copyright": "مجموعة أدوات العقارات. جميع الحقوق محفوظة.",
+      "about": "حول",
+      "privacy": "الخصوصية"
     }
   }
 }

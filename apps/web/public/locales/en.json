@@ -51,7 +51,13 @@
     "password_placeholder": "Create a password",
     "confirm_password_label": "Confirm Password",
     "confirm_password_placeholder": "Confirm your password",
-    "submit_button": "Sign Up"
+    "submit_button": "Sign Up",
+    "account_type": "Account Type",
+    "select_account_type": "Select account type...",
+    "role_broker": "Broker / Company",
+    "role_buyer": "Buyer",
+    "company_name": "Company Name",
+    "company_placeholder": "Enter your brokerage or company name"
   },
   "logout": "Logout",
   "email": "Email",
@@ -250,32 +256,18 @@
       "Ready": "Ready"
     },
     "errors": {
-      "title_min": "Title must be at least 3 characters",
+      "title_min": "Title must be at least 2 characters",
       "invalid_price": "Price must be greater than 0",
-      "notes_required": "Notes are required",
+      "notes_required": "Notes is required",
       "fetch_failed": "Failed to fetch properties",
       "create_failed": "Failed to create property",
       "update_failed": "Failed to update property",
       "delete_failed": "Failed to delete property",
       "image_upload_failed": "Failed to upload images",
       "location_required": "Location is required",
-      "title_min": "Title must be at least 2 characters",
-      "title_required": "Title is required",
-      "price_required": "Price is required",
-      "bedrooms_required": "Bedrooms is required",
-      "bathrooms_required": "Bathrooms is required",
-      "area_required": "Area is required",
-      "description_required": "Description is required",
-      "type_required": "Type is required",
-      "status_required": "Status is required",
-      "furnished_required": "Furnished is required",
-      "amenities_required": "Amenities is required",
-      "images_required": "Images is required",
       "floor_required": "Floor is required",
       "year_built_required": "Year built is required",
-      "notes_required": "Notes is required",
-      "image_required_published": "Published properties must have at least one image",
-      "invalid_price": "Price must be greater than 0"
+      "image_required_published": "Published properties must have at least one image"
     },
     "hints": {
       "handover_date": "Expected date of property handover",
@@ -499,6 +491,187 @@
     "status": {
       "disabled": "Disabled",
       "active": "Active"
+    }
+  },
+  "portal": {
+    "nav": {
+      "brand": "Properties",
+      "home": "Home",
+      "browse": "Browse Properties",
+      "favorites": "Saved Properties",
+      "profile": "My Profile",
+      "login": "Sign In",
+      "logout": "Log Out",
+      "account": "Account",
+      "browse_short": "Browse",
+      "saved_short": "Saved",
+      "profile_short": "Profile"
+    },
+    "hero": {
+      "title": "Find Your Dream Property",
+      "subtitle": "Discover premium properties across the UAE. Search, save, and connect with agents instantly.",
+      "search_placeholder": "Search for 2BR in Dubai Marina under 2M AED...",
+      "search_btn": "Search"
+    },
+    "quick_filter": {
+      "for_sale": "For Sale",
+      "for_rent": "For Rent",
+      "off_plan": "Off-Plan",
+      "villa": "Villas",
+      "apartment": "Apartments"
+    },
+    "home": {
+      "featured_title": "Featured Properties",
+      "featured_subtitle": "Handpicked premium listings for you",
+      "view_all": "View All →",
+      "no_listings": "No listings yet",
+      "no_listings_desc": "Check back soon for new properties.",
+      "featured_eyebrow": "Curated",
+      "stats": {
+        "listings": "Active Listings",
+        "locations": "Prime Locations",
+        "support": "Agent Support",
+        "rating": "Client Rating"
+      }
+    },
+    "search": {
+      "placeholder": "Search properties...",
+      "btn": "Search",
+      "results_count": "{{count}} properties found",
+      "sort": "Sort by",
+      "sort_newest": "Newest",
+      "sort_price_low": "Price: Low → High",
+      "sort_price_high": "Price: High → Low",
+      "sort_beds": "Bedrooms",
+      "no_results": "No properties found",
+      "no_results_desc": "Try adjusting your search or filters to find what you're looking for.",
+      "prev": "Previous",
+      "next": "Next",
+      "page_info": "Page {{page}} of {{totalPages}}",
+      "loading": "Loading properties...",
+      "loading_more": "Loading more...",
+      "end_of_results": "You've seen all properties"
+    },
+    "filters": {
+      "title": "Filters",
+      "price_range": "Price Range (AED)",
+      "bedrooms": "Bedrooms",
+      "property_type": "Property Type",
+      "status": "Status",
+      "location": "Location",
+      "all_locations": "All Locations",
+      "apply": "Apply Filters",
+      "clear": "Clear",
+      "clear_all": "Clear All",
+      "bedroom_options": {
+        "studio": "Studio",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5_plus": "5+"
+      }
+    },
+    "property_types": {
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "townhouse": "Townhouse",
+      "office": "Office",
+      "plot": "Plot",
+      "commercial": "Commercial"
+    },
+    "status": {
+      "for_sale": "For Sale",
+      "for_rent": "For Rent",
+      "off-plan": "Off-Plan",
+      "ready": "Ready"
+    },
+    "card": {
+      "beds": "Beds",
+      "baths": "Baths",
+      "sqft": "sqft",
+      "per_year": "/ year",
+      "currency": "AED"
+    },
+    "locations": {
+      "dubai_marina": "Dubai Marina",
+      "downtown_dubai": "Downtown Dubai",
+      "palm_jumeirah": "Palm Jumeirah",
+      "jumeirah_village_circle": "Jumeirah Village Circle",
+      "business_bay": "Business Bay",
+      "dubai_hills_estate": "Dubai Hills Estate",
+      "arabian_ranches": "Arabian Ranches",
+      "difc": "DIFC"
+    },
+    "detail": {
+      "back": "Back to search",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "area": "Area",
+      "year_built": "Year Built",
+      "description": "Description",
+      "amenities": "Amenities",
+      "details": "Details",
+      "furnished": "Furnished",
+      "floor": "Floor",
+      "rera": "RERA ID",
+      "roi": "ROI Estimate",
+      "handover": "Handover",
+      "payment_plan": "Payment Plan",
+      "similar": "Similar Properties"
+    },
+    "favorites": {
+      "title": "Saved Properties",
+      "subtitle": "{{count}} saved properties",
+      "empty_title": "No saved properties yet",
+      "empty_desc": "Start browsing and tap the heart icon to save properties you love.",
+      "browse_btn": "Browse Properties",
+      "login_required": "Sign in to save properties",
+      "saved": "Property saved!",
+      "removed": "Property removed from saved",
+      "error": "Failed to update. Try again.",
+      "save_aria": "Save property",
+      "remove_aria": "Remove from saved"
+    },
+    "profile": {
+      "title": "My Profile",
+      "subtitle": "Your account information",
+      "email": "Email",
+      "company": "Company",
+      "member_since": "Member Since",
+      "unnamed": "Unnamed User",
+      "inquiry_history": "Inquiry History",
+      "inquiry_desc": "Your past property inquiries",
+      "no_inquiries": "No inquiries yet. Browse properties and send your first inquiry!"
+    },
+    "inquiry": {
+      "title": "Interested in this property?",
+      "subtitle": "Send your inquiry and an agent will get back to you.",
+      "name": "Full Name",
+      "name_placeholder": "Your name",
+      "email": "Email",
+      "email_placeholder": "your@email.com",
+      "phone": "Phone",
+      "phone_placeholder": "+971 50 000 0000",
+      "message": "Message",
+      "message_placeholder": "Tell us what you're looking for...",
+      "default_message": "I'm interested in \"{{title}}\". Please send me more details.",
+      "submit": "Send Inquiry",
+      "success": "Inquiry sent — lead created in CRM! An agent will contact you shortly.",
+      "error": "Failed to send inquiry. Please try again."
+    },
+    "footer": {
+      "brand": "Properties",
+      "tagline": "Find your perfect property in the UAE. Browse, save, and inquire on premium listings.",
+      "quick_links": "Quick Links",
+      "property_types": "Property Types",
+      "contact": "Contact",
+      "email": "info@realestate.ae",
+      "phone": "+971 4 000 0000",
+      "address": "Dubai, UAE",
+      "copyright": "Real Estate Toolkit. All rights reserved.",
+      "about": "About",
+      "privacy": "Privacy"
     }
   }
 }

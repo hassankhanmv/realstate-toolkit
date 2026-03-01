@@ -41,7 +41,17 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await supabase.auth.getUser();
 
   if (user) {
-    return data(null, { status: 302, headers: { Location: "/dashboard" } });
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const target = profile?.role === "buyer" ? "/portal" : "/dashboard";
+    return data(null, {
+      status: 302,
+      headers: { ...headers, Location: target },
+    });
   }
 
   return data(null, { headers });
@@ -69,15 +79,19 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return data({ error: error.message }, { status: 400, headers });
   }
 
+  // Fetch profile to get role for redirect
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, notifications, full_name")
+    .eq("id", authData.user.id)
+    .single();
+
+  const userWithProfile = {
+    ...authData.user,
+    profile: profile as any,
+  };
+
   try {
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("notifications, full_name")
-      .eq("id", authData.user.id)
-      .single();
-
-    const profile = profileData as unknown as import("@repo/supabase").Profile;
-
     if (profile) {
       let notifications = profile.notifications;
       if (typeof notifications === "string") {
@@ -94,7 +108,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
         const ipAddress = getClientIP(request);
         const userAgent = getClientDevice(request);
-        const dashBoardUrl = new URL("/dashboard", request.url).toString();
+        const targetUrl = profile.role === "buyer" ? "/portal" : "/dashboard";
+        const dashBoardUrl = new URL(targetUrl, request.url).toString();
 
         const { subject, html } = getLoginNotificationEmail({
           userFullName: profile.full_name || "User",
@@ -113,7 +128,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
     console.error("Error checking/sending login notification:", err);
   }
 
-  return data({ success: true, user: authData.user }, { status: 200, headers });
+  return data(
+    { success: true, user: userWithProfile },
+    { status: 200, headers },
+  );
 };
 
 export default function Login() {
@@ -147,8 +165,12 @@ export default function Login() {
         }),
       );
       dispatch(setUser(actionData.user));
+
+      const role = actionData.user?.profile?.role;
+      const target = role === "buyer" ? "/portal" : "/dashboard";
+
       setTimeout(() => {
-        // window.location.href = "/dashboard";
+        window.location.href = target;
       }, 1000);
     }
   }, [actionData, dispatch, t]);

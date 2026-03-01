@@ -38,6 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     )
     .eq("company_name", authProfile.company_name)
     .neq("id", authUser.id)
+    .neq("role", "buyer")
     .order("created_at", { ascending: false });
 
   if (error) {

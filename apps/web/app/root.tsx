@@ -152,9 +152,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
             asChild
             className="h-11 px-8 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            <Link to="/dashboard">
+            <Link to="/">
               <Home className="me-2 h-4 w-4" />
-              Return to Dashboard
+              Return Home
             </Link>
           </Button>
           <Button

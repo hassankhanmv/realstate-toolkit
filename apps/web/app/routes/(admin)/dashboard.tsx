@@ -23,13 +23,10 @@ import { setLoading } from "~/store/slices/uiSlice";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo } from "react";
-import { requireAuth } from "@/lib/auth.server";
+import { requireAdminAuth } from "@/lib/auth.server";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-  const { user, headers } = await requireAuth(request).catch((err) => {
-    throw err;
-  });
-
+  const { user, headers } = await requireAdminAuth(request);
   return data({ user }, { headers });
 };
 

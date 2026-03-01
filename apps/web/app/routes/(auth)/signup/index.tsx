@@ -38,7 +38,17 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   } = await supabase.auth.getUser();
 
   if (user) {
-    return data(null, { status: 302, headers: { Location: "/dashboard" } });
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const target = profile?.role === "buyer" ? "/portal" : "/dashboard";
+    return data(null, {
+      status: 302,
+      headers: { ...headers, Location: target },
+    });
   }
 
   return data(null, { headers });
@@ -97,7 +107,22 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return data({ error: error.message }, { status: 400, headers });
   }
 
-  return data({ success: true, user: authData.user }, { status: 200, headers });
+  // Create a user object with a stub profile for immediate state update
+  const userWithProfile = {
+    ...authData.user,
+    profile: {
+      id: authData.user.id,
+      full_name,
+      role: validation.data.role,
+      company_name:
+        validation.data.role === "company_owner" ? company_name : null,
+    } as any,
+  };
+
+  return data(
+    { success: true, user: userWithProfile },
+    { status: 200, headers },
+  );
 };
 
 export default function Signup() {
@@ -127,7 +152,13 @@ export default function Signup() {
         description: "Account created! Redirecting...",
       });
       dispatch(setUser(actionData.user));
-      window.location.href = "/dashboard";
+
+      const role = (actionData.user as any)?.profile?.role;
+      const target = role === "buyer" ? "/portal" : "/dashboard";
+
+      setTimeout(() => {
+        window.location.href = target;
+      }, 1000);
     }
   }, [actionData, dispatch, t]);
 
@@ -174,7 +205,7 @@ export default function Signup() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="role">Account Type</Label>
+                  <Label htmlFor="role">{t("signup.account_type")}</Label>
                   <Select
                     name="role"
                     value={role}
@@ -182,24 +213,30 @@ export default function Signup() {
                     required
                   >
                     <SelectTrigger id="role" className="w-full">
-                      <SelectValue placeholder="Select account type..." />
+                      <SelectValue
+                        placeholder={t("signup.select_account_type")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="company_owner">
-                        Broker / Company
+                        {t("signup.role_broker")}
                       </SelectItem>
-                      <SelectItem value="buyer">Buyer</SelectItem>
+                      <SelectItem value="buyer">
+                        {t("signup.role_buyer")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {role === "company_owner" && (
                   <div className="grid gap-2 animate-in fade-in zoom-in-95 duration-200">
-                    <Label htmlFor="company_name">Company Name</Label>
+                    <Label htmlFor="company_name">
+                      {t("signup.company_name")}
+                    </Label>
                     <Input
                       id="company_name"
                       name="company_name"
-                      placeholder="Enter your brokerage or company name"
+                      placeholder={t("signup.company_placeholder")}
                       type="text"
                       disabled={isSubmitting}
                       required

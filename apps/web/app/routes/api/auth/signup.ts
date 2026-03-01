@@ -12,13 +12,18 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const full_name = formData.get("full_name") as string;
-  const company_name = formData.get("company_name") as string | undefined;
+  const confirmPassword = formData.get("confirmPassword") as string;
+  const full_name =
+    (formData.get("full_name") as string) || (formData.get("name") as string);
+  const role = formData.get("role") as string;
+  const company_name = formData.get("company_name") as string | null;
 
   const validation = signupSchema.safeParse({
     email,
     password,
+    confirmPassword,
     full_name,
+    role,
     company_name,
   });
 
@@ -33,6 +38,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
     options: {
       data: {
         full_name,
+        role,
         company_name,
       },
     },
