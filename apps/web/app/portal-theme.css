@@ -97,14 +97,14 @@
 .portal-theme .portal-card {
   background: white;
   border: 1px solid hsl(38 15% 91%);
-  border-radius: 0.5rem;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  border-radius: 0.625rem;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
   overflow: hidden;
 }
 
 .portal-theme .portal-card:hover {
-  box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+  box-shadow: 0 12px 40px -10px rgba(48, 43, 37, 0.12);
+  transform: translateY(-3px);
 }
 
 /* ── Image container ───────────────────────────────────────────────────────── */
@@ -115,23 +115,122 @@
 }
 
 .portal-theme .portal-image-container img {
-  transition: transform 0.4s ease;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .portal-theme .portal-image-container:hover img {
-  transform: scale(1.03);
+  transform: scale(1.05);
+}
+
+/* ── Card hover image carousel ─────────────────────────────────────────────── */
+
+.portal-theme .portal-card-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-theme .portal-card-carousel .carousel-nav {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.portal-theme .portal-card:hover .carousel-nav {
+  opacity: 1;
+}
+
+.portal-theme .portal-card-carousel .carousel-dots {
+  opacity: 0;
+  transition: opacity 0.25s ease 0.1s;
+}
+
+.portal-theme .portal-card:hover .carousel-dots {
+  opacity: 1;
+}
+
+/* ── Hero section ──────────────────────────────────────────────────────────── */
+
+.portal-hero {
+  background: linear-gradient(165deg, #302B25 0%, #1a1714 45%, #2a2520 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 600px 300px at 20% 80%, rgba(196, 144, 61, 0.08), transparent),
+    radial-gradient(ellipse 400px 400px at 80% 20%, rgba(196, 144, 61, 0.06), transparent);
+}
+
+.portal-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C4903D' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* ── Glass-morphism (sticky nav) ───────────────────────────────────────────── */
+
+.portal-glass {
+  background: rgba(253, 251, 247, 0.85);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  backdrop-filter: blur(12px) saturate(1.5);
+  border-bottom: 1px solid rgba(230, 224, 216, 0.5);
 }
 
 /* ── Animations ────────────────────────────────────────────────────────────── */
 
 @keyframes portal-fade-in {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.portal-theme .portal-animate-in {
-  animation: portal-fade-in 0.35s ease-out forwards;
+@keyframes portal-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes portal-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes portal-slide-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes portal-count-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.portal-theme .portal-animate-in {
+  animation: portal-fade-in 0.4s ease-out forwards;
+}
+
+.portal-theme .portal-animate-up {
+  animation: portal-fade-in-up 0.5s ease-out forwards;
+}
+
+.portal-theme .portal-animate-scale {
+  animation: portal-scale-in 0.3s ease-out forwards;
+}
+
+/* Stagger children */
+.portal-theme .portal-stagger > * {
+  opacity: 0;
+  animation: portal-fade-in 0.4s ease-out forwards;
+}
+.portal-theme .portal-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.portal-theme .portal-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.portal-theme .portal-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.portal-theme .portal-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.portal-theme .portal-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.portal-theme .portal-stagger > *:nth-child(6) { animation-delay: 0.3s; }
 
 /* ── Skeleton shimmer ──────────────────────────────────────────────────────── */
 
@@ -164,4 +263,73 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ── Tab styles (hero) ─────────────────────────────────────────────────────── */
+
+.portal-hero-tabs [data-state="active"] {
+  color: #C4903D !important;
+  border-color: #C4903D !important;
+}
+
+.portal-hero-tabs [data-state="inactive"] {
+  color: rgba(255, 255, 255, 0.6);
+  border-color: transparent;
+}
+
+.portal-hero-tabs [data-state="inactive"]:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Detail page tabs ──────────────────────────────────────────────────────── */
+
+.portal-detail-tabs [data-state="active"] {
+  color: #302B25 !important;
+  border-color: #C4903D !important;
+  font-weight: 600;
+}
+
+/* ── Share button tooltip ──────────────────────────────────────────────────── */
+
+.portal-share-copied {
+  animation: portal-count-pulse 0.3s ease;
+}
+
+/* ── Scrollbar styling ─────────────────────────────────────────────────────── */
+
+.portal-theme ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.portal-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.portal-theme ::-webkit-scrollbar-thumb {
+  background: hsl(38 15% 82%);
+  border-radius: 3px;
+}
+
+.portal-theme ::-webkit-scrollbar-thumb:hover {
+  background: hsl(38 15% 72%);
+}
+
+/* ── Responsive image grid (detail page) ───────────────────────────────────── */
+
+.portal-thumbnail-strip {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0.5rem 0;
+}
+
+.portal-thumbnail-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.portal-thumbnail-strip button {
+  flex-shrink: 0;
 }

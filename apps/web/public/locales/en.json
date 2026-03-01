@@ -505,13 +505,22 @@
       "account": "Account",
       "browse_short": "Browse",
       "saved_short": "Saved",
-      "profile_short": "Profile"
+      "profile_short": "Profile",
+      "search_placeholder": "Search properties..."
     },
     "hero": {
+      "eyebrow": "UAE Premium Properties",
       "title": "Find Your Dream Property",
-      "subtitle": "Discover premium properties across the UAE. Search, save, and connect with agents instantly.",
-      "search_placeholder": "Search for 2BR in Dubai Marina under 2M AED...",
-      "search_btn": "Search"
+      "subtitle": "Smart search across the UAE. Buy, rent, or invest in premium real estate.",
+      "search_placeholder": "Search by location, community, or keyword...",
+      "search_btn": "Search",
+      "tab_buy": "Buy",
+      "tab_rent": "Rent",
+      "tab_off_plan": "Off-Plan",
+      "tab_commercial": "Commercial",
+      "trending": "Trending",
+      "popular_locations": "Popular Locations",
+      "count": "{{count}} properties available"
     },
     "quick_filter": {
       "for_sale": "For Sale",
@@ -523,7 +532,7 @@
     "home": {
       "featured_title": "Featured Properties",
       "featured_subtitle": "Handpicked premium listings for you",
-      "view_all": "View All →",
+      "view_all": "View All",
       "no_listings": "No listings yet",
       "no_listings_desc": "Check back soon for new properties.",
       "featured_eyebrow": "Curated",
@@ -591,7 +600,8 @@
       "baths": "Baths",
       "sqft": "sqft",
       "per_year": "/ year",
-      "currency": "AED"
+      "currency": "AED",
+      "inquire": "Inquire Now"
     },
     "locations": {
       "dubai_marina": "Dubai Marina",
@@ -605,20 +615,37 @@
     },
     "detail": {
       "back": "Back to search",
+      "search": "Search",
       "bedrooms": "Bedrooms",
       "bathrooms": "Bathrooms",
       "area": "Area",
       "year_built": "Year Built",
       "description": "Description",
       "amenities": "Amenities",
-      "details": "Details",
+      "details": "Property Details",
       "furnished": "Furnished",
       "floor": "Floor",
       "rera": "RERA ID",
       "roi": "ROI Estimate",
       "handover": "Handover",
       "payment_plan": "Payment Plan",
-      "similar": "Similar Properties"
+      "similar": "Similar Properties",
+      "recommended": "Recommended",
+      "share": "Share",
+      "copy_link": "Copy Link",
+      "copied": "Copied!",
+      "tab_overview": "Overview",
+      "tab_amenities": "Amenities",
+      "tab_location": "Location",
+      "tab_payment": "Payment",
+      "type": "Type",
+      "status_label": "Status",
+      "yes": "Yes",
+      "tba": "To Be Announced",
+      "contact_agent": "Contact agent for details",
+      "handover_date": "Handover Date",
+      "roi_estimate": "ROI Estimate",
+      "open_maps": "Open in Google Maps"
     },
     "favorites": {
       "title": "Saved Properties",

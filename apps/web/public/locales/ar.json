@@ -509,13 +509,22 @@
       "account": "الحساب",
       "browse_short": "تصفح",
       "saved_short": "المحفوظة",
-      "profile_short": "الملف"
+      "profile_short": "الملف",
+      "search_placeholder": "البحث عن عقارات..."
     },
     "hero": {
+      "eyebrow": "عقارات الإمارات المتميزة",
       "title": "جد عقار أحلامك",
-      "subtitle": "اكتشف عقارات متميزة في جميع أنحاء الإمارات. ابحث واحفظ وتواصل مع الوكلاء فوراً.",
-      "search_placeholder": "ابحث عن شقة غرفتين في دبي مارينا بأقل من 2 مليون درهم...",
-      "search_btn": "بحث"
+      "subtitle": "بحث ذكي في جميع أنحاء الإمارات. شراء أو إيجار أو استثمار في العقارات المتميزة.",
+      "search_placeholder": "ابحث بالموقع أو المجتمع أو الكلمة...",
+      "search_btn": "بحث",
+      "tab_buy": "شراء",
+      "tab_rent": "إيجار",
+      "tab_off_plan": "على الخارطة",
+      "tab_commercial": "تجاري",
+      "trending": "الرائج",
+      "popular_locations": "المواقع الشائعة",
+      "count": "{{count}} عقار متاح"
     },
     "quick_filter": {
       "for_sale": "للبيع",
@@ -527,9 +536,10 @@
     "home": {
       "featured_title": "عقارات مميزة",
       "featured_subtitle": "قوائم مختارة بعناية لك",
-      "view_all": "عرض الكل ←",
+      "view_all": "عرض الكل",
       "no_listings": "لا توجد قوائم بعد",
       "no_listings_desc": "عد قريباً للعثور على عقارات جديدة.",
+      "featured_eyebrow": "مختارة",
       "stats": {
         "listings": "قوائم نشطة",
         "locations": "مواقع رئيسية",
@@ -550,7 +560,10 @@
       "no_results_desc": "حاول ضبط البحث أو الفلاتر للعثور على ما تبحث عنه.",
       "prev": "السابق",
       "next": "التالي",
-      "page_info": "صفحة {{page}} من {{totalPages}}"
+      "page_info": "صفحة {{page}} من {{totalPages}}",
+      "loading": "جاري تحميل العقارات...",
+      "loading_more": "جاري تحميل المزيد...",
+      "end_of_results": "لقد شاهدت جميع العقارات"
     },
     "filters": {
       "title": "الفلاتر",
@@ -562,6 +575,7 @@
       "all_locations": "كل المواقع",
       "apply": "تطبيق الفلاتر",
       "clear": "مسح",
+      "clear_all": "مسح الكل",
       "bedroom_options": {
         "studio": "ستوديو",
         "1": "1",
@@ -590,7 +604,8 @@
       "baths": "حمامات",
       "sqft": "قدم مربع",
       "per_year": "/ سنوياً",
-      "currency": "درهم"
+      "currency": "درهم",
+      "inquire": "استفسر الآن"
     },
     "locations": {
       "dubai_marina": "دبي مارينا",
@@ -604,20 +619,37 @@
     },
     "detail": {
       "back": "العودة للبحث",
+      "search": "البحث",
       "bedrooms": "غرف النوم",
       "bathrooms": "الحمامات",
       "area": "المساحة",
       "year_built": "سنة البناء",
       "description": "الوصف",
       "amenities": "المرافق",
-      "details": "التفاصيل",
+      "details": "تفاصيل العقار",
       "furnished": "مفروش",
       "floor": "الطابق",
       "rera": "رقم ريرا",
       "roi": "العائد المتوقع",
       "handover": "التسليم",
       "payment_plan": "خطة الدفع",
-      "similar": "عقارات مشابهة"
+      "similar": "عقارات مشابهة",
+      "recommended": "موصى به",
+      "share": "مشاركة",
+      "copy_link": "نسخ الرابط",
+      "copied": "تم النسخ!",
+      "tab_overview": "نظرة عامة",
+      "tab_amenities": "المرافق",
+      "tab_location": "الموقع",
+      "tab_payment": "الدفع",
+      "type": "النوع",
+      "status_label": "الحالة",
+      "yes": "نعم",
+      "tba": "سيتم الإعلان",
+      "contact_agent": "تواصل مع الوكيل للتفاصيل",
+      "handover_date": "تاريخ التسليم",
+      "roi_estimate": "العائد المتوقع",
+      "open_maps": "فتح في خرائط جوجل"
     },
     "favorites": {
       "title": "العقارات المحفوظة",

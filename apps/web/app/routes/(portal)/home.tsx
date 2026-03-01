@@ -1,13 +1,6 @@
 import { data } from "react-router";
 import type { Route } from "./+types/home";
-import {
-  useEffect,
-  useMemo,
-  useCallback,
-  useState,
-  lazy,
-  Suspense,
-} from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { setUser } from "~/store/slices/authSlice";
@@ -17,7 +10,8 @@ import { PortalLayout } from "@/components/layouts/PortalLayout";
 import { HeroSearch } from "@/components/portal/HeroSearch";
 import { PropertyCard } from "@/components/portal/PropertyCard";
 import { PropertyCardSkeleton } from "@/components/portal/PropertyCardSkeleton";
-import { Building2, TrendingUp, MapPin, Star } from "lucide-react";
+import { Building2, TrendingUp, MapPin, Star, ArrowRight } from "lucide-react";
+import { Link } from "react-router";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -49,19 +43,27 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     }
   }
 
+  // Extract unique locations for trending chips
+  const locations = result.properties
+    .map((p: any) => p.location)
+    .filter(Boolean);
+  const uniqueLocations = [...new Set(locations as string[])].slice(0, 6);
+
   return data(
     {
       user,
       properties: result.properties,
       totalCount: result.total,
       favoriteIds,
+      trendingLocations: uniqueLocations,
     },
     { headers },
   );
 };
 
 export default function PortalHome({ loaderData }: Route.ComponentProps) {
-  const { user, properties, totalCount, favoriteIds } = loaderData;
+  const { user, properties, totalCount, favoriteIds, trendingLocations } =
+    loaderData;
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -114,18 +116,17 @@ export default function PortalHome({ loaderData }: Route.ComponentProps) {
   return (
     <PortalLayout user={user}>
       {/* Hero Search Section */}
-      <HeroSearch />
+      <HeroSearch
+        trendingLocations={trendingLocations as string[]}
+        totalCount={totalCount}
+      />
 
       {/* Stats Strip */}
       <section className="bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 portal-stagger">
             {stats.map((stat, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 portal-animate-in"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
+              <div key={i} className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-[#C4903D]/10 flex items-center justify-center shrink-0">
                   <stat.icon className="h-6 w-6 text-[#C4903D]" />
                 </div>
@@ -133,7 +134,9 @@ export default function PortalHome({ loaderData }: Route.ComponentProps) {
                   <p className="text-xl font-bold text-foreground">
                     {stat.value}
                   </p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="text-[12px] text-muted-foreground">
+                    {stat.label}
+                  </p>
                 </div>
               </div>
             ))}
@@ -158,21 +161,18 @@ export default function PortalHome({ loaderData }: Route.ComponentProps) {
               )}
             </p>
           </div>
-          <a
-            href="/portal/search"
-            className="text-[13px] font-medium text-[#C4903D] hover:underline hidden sm:block"
+          <Link
+            to="/portal/search"
+            className="hidden sm:flex items-center gap-1.5 text-[13px] font-medium text-[#C4903D] hover:underline"
           >
-            {t("portal.home.view_all", "View All →")}
-          </a>
+            {t("portal.home.view_all", "View All")}
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {properties.map((property: any, idx: number) => (
-            <div
-              key={property.id}
-              className="portal-animate-in"
-              style={{ animationDelay: `${idx * 0.08}s` }}
-            >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 portal-stagger">
+          {properties.map((property: any) => (
+            <div key={property.id}>
               <PropertyCard
                 property={property}
                 isFavorited={favIds.has(property.id)}
@@ -200,12 +200,13 @@ export default function PortalHome({ loaderData }: Route.ComponentProps) {
 
         {/* Mobile view all link */}
         <div className="text-center mt-8 sm:hidden">
-          <a
-            href="/portal/search"
-            className="text-[13px] font-medium text-[#C4903D] hover:underline"
+          <Link
+            to="/portal/search"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#C4903D] hover:underline"
           >
-            {t("portal.home.view_all", "View All →")}
-          </a>
+            {t("portal.home.view_all", "View All")}
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </section>
     </PortalLayout>

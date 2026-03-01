@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,8 +10,10 @@ import {
   ChevronDown,
   Home,
   Compass,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +39,33 @@ export function PortalNavbar({ user }: PortalNavbarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  // Sticky search bar state
+  const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [stickyQuery, setStickyQuery] = useState("");
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 300);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  // Only show sticky search on home page (hero becomes hidden)
+  const isHomePage = pathname === "/portal";
+  const showStickySearch = scrolled && isHomePage;
+
+  const handleStickySearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (stickyQuery.trim()) {
+        navigate(`/portal/search?q=${encodeURIComponent(stickyQuery.trim())}`);
+        setStickyQuery("");
+        setSearchOpen(false);
+      }
+    },
+    [stickyQuery, navigate],
+  );
 
   const handleLogout = useCallback(async () => {
     try {
@@ -66,7 +95,14 @@ export function PortalNavbar({ user }: PortalNavbarProps) {
   return (
     <>
       {/* Desktop/Tablet Top Navbar */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/50">
+      <header
+        className={cn(
+          "sticky top-0 z-50 transition-all duration-300",
+          scrolled
+            ? "portal-glass shadow-sm"
+            : "bg-white/95 backdrop-blur-md border-b border-border/50",
+        )}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[56px]">
             {/* Logo */}
@@ -99,8 +135,44 @@ export function PortalNavbar({ user }: PortalNavbarProps) {
               ))}
             </nav>
 
+            {/* Center sticky search (appears on scroll, home page only) */}
+            {showStickySearch && (
+              <div className="hidden md:flex items-center flex-1 max-w-md mx-4 portal-animate-scale">
+                <form
+                  onSubmit={handleStickySearch}
+                  className="w-full flex items-center"
+                >
+                  <div className="relative flex-1">
+                    <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder={t(
+                        "portal.nav.search_placeholder",
+                        "Search properties...",
+                      )}
+                      value={stickyQuery}
+                      onChange={(e) => setStickyQuery(e.target.value)}
+                      className="h-9 ps-9 pe-3 text-[13px] border-border/60 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-[#C4903D]"
+                    />
+                  </div>
+                </form>
+              </div>
+            )}
+
             {/* Right side */}
             <div className="flex items-center gap-1.5">
+              {/* Mobile search icon (for sticky) */}
+              {showStickySearch && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 md:hidden cursor-pointer"
+                  onClick={() => setSearchOpen(!searchOpen)}
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              )}
+
               <LanguageSwitcher />
 
               {user ? (
@@ -175,6 +247,38 @@ export function PortalNavbar({ user }: PortalNavbarProps) {
             </div>
           </div>
         </div>
+
+        {/* Mobile search overlay (expands below navbar) */}
+        {searchOpen && (
+          <div className="md:hidden px-4 pb-3 border-t border-border/30 portal-animate-in">
+            <form
+              onSubmit={handleStickySearch}
+              className="flex items-center gap-2"
+            >
+              <div className="relative flex-1">
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={t(
+                    "portal.nav.search_placeholder",
+                    "Search properties...",
+                  )}
+                  value={stickyQuery}
+                  onChange={(e) => setStickyQuery(e.target.value)}
+                  className="h-9 ps-9 text-[13px] border-border/60 focus-visible:ring-0 focus:border-[#C4903D]"
+                  autoFocus
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                className="h-9 w-9 flex items-center justify-center"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </form>
+          </div>
+        )}
       </header>
 
       {/* Mobile Bottom Navigation */}
