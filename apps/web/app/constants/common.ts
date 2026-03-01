@@ -26,6 +26,10 @@ export const ROUTES = {
   DASHBOARD_USERS: "/dashboard/users",
   DASHBOARD_PROFILE: "/dashboard/profile",
   DASHBOARD_SETTINGS: "/dashboard/settings",
+  PORTAL: "/portal",
+  PORTAL_SEARCH: "/portal/search",
+  PORTAL_FAVORITES: "/portal/favorites",
+  PORTAL_PROFILE: "/portal/profile",
 } as const;
 
 export const STORAGE_KEYS = {

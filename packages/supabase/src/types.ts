@@ -213,6 +213,52 @@ export type Database = {
           created_at?: string;
         };
       };
+      favorites: {
+        Row: {
+          id: string;
+          buyer_id: string;
+          property_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          buyer_id: string;
+          property_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          buyer_id?: string;
+          property_id?: string;
+          created_at?: string;
+        };
+      };
+      user_action_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          action_type: string;
+          details: Record<string, unknown> | null;
+          property_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          action_type: string;
+          details?: Record<string, unknown> | null;
+          property_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          action_type?: string;
+          details?: Record<string, unknown> | null;
+          property_id?: string | null;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -246,3 +292,12 @@ export type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"];
 export type LeadEvent = Database["public"]["Tables"]["lead_events"]["Row"];
 export type LeadEventInsert =
   Database["public"]["Tables"]["lead_events"]["Insert"];
+
+export type Favorite = Database["public"]["Tables"]["favorites"]["Row"];
+export type FavoriteInsert =
+  Database["public"]["Tables"]["favorites"]["Insert"];
+
+export type UserActionLog =
+  Database["public"]["Tables"]["user_action_logs"]["Row"];
+export type UserActionLogInsert =
+  Database["public"]["Tables"]["user_action_logs"]["Insert"];

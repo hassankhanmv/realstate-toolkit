@@ -10,7 +10,7 @@ export const signupSchema = z
     email: z.string().email("validations.invalid_email"),
     full_name: z.string().min(2, "validations.full_name_min"),
     role: z.enum(["company_owner", "buyer"]),
-    company_name: z.string().optional(),
+    company_name: z.string().nullable().optional(),
     password: z.string().min(6, "validations.password_min"),
     confirmPassword: z.string().min(6, "validations.password_min"),
   })

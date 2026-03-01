@@ -41,5 +41,16 @@ export default [
     "api/users/request-password-reset",
     "routes/api/users/request-password-reset.ts",
   ),
-] satisfies RouteConfig;
 
+  // Portal Routes (Buyer-facing)
+  route("portal", "routes/(portal)/home.tsx"),
+  route("portal/search", "routes/(portal)/search.tsx"),
+  route("portal/property/:id", "routes/(portal)/property.$id.tsx"),
+  route("portal/favorites", "routes/(portal)/favorites.tsx"),
+  route("portal/profile", "routes/(portal)/profile.tsx"),
+
+  // Portal API Routes
+  route("api/portal/properties", "routes/api/portal/properties.ts"),
+  route("api/portal/favorites", "routes/api/portal/favorites.ts"),
+  route("api/portal/inquire", "routes/api/portal/inquire.ts"),
+] satisfies RouteConfig;

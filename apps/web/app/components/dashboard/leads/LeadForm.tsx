@@ -543,7 +543,7 @@ export function LeadForm({
             </TabsContent>
 
             {/* SHARED FOOTER FOR BOTH TABS WHEN EDITING PROFILES */}
-            <div className="flex items-center justify-end gap-3 px-4 sm:px-8 py-4 border-t border-border/50 shrink-0 bg-card z-10">
+            <div className="flex items-center justify-end gap-3 px-4 sm:px-8 py-4 border-t border-border/50 shrink-0 bg-card z-10 rounded-b-lg">
               <Button
                 type="button"
                 variant="ghost"

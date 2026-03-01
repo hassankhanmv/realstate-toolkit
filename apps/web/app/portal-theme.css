@@ -1,0 +1,167 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   Portal Theme — UAE Luxury Real Estate
+   Warm charcoal + gold accent palette. Elegant, minimal, premium.
+   Scoped under .portal-theme class so it doesn't affect admin dashboard.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.portal-theme {
+  --background: 40 20% 98%;       /* #FDFBF7 — warm off-white */
+  --foreground: 20 10% 12%;       /* #1F1B16 — warm near-black */
+
+  --card: 0 0% 100%;              /* Pure white */
+  --card-foreground: 20 10% 12%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 10% 12%;
+
+  --primary: 20 8% 18%;           /* #302B25 — dark charcoal (buttons, key text) */
+  --primary-foreground: 40 20% 97%;
+
+  --secondary: 38 18% 95%;        /* #F5F0EB — warm light bg */
+  --secondary-foreground: 20 10% 25%;
+
+  --muted: 38 14% 93%;
+  --muted-foreground: 20 5% 46%;  /* #787169 — warm medium gray */
+
+  --accent: 36 56% 51%;           /* #C4903D — warm gold */
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 38 15% 89%;           /* #E6E0D8 — warm border */
+  --input: 38 15% 89%;
+  --ring: 36 56% 51%;             /* Gold ring */
+
+  --radius: 0.5rem;
+
+  /* Typography — clean, professional */
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Global portal resets ─────────────────────────────────────────────────── */
+
+.portal-theme *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.portal-theme button,
+.portal-theme a,
+.portal-theme [role="button"],
+.portal-theme select,
+.portal-theme input[type="checkbox"],
+.portal-theme [data-state] {
+  cursor: pointer;
+}
+
+/* Bottom safe area for mobile nav */
+.portal-theme .portal-main {
+  padding-bottom: 4.5rem;
+}
+@media (min-width: 768px) {
+  .portal-theme .portal-main {
+    padding-bottom: 0;
+  }
+}
+
+/* ── Headings ──────────────────────────────────────────────────────────────── */
+
+.portal-theme .portal-heading {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: hsl(20 10% 12%);
+}
+
+.portal-theme .portal-heading-xl {
+  font-size: 1.625rem; /* 26px */
+  line-height: 1.2;
+}
+
+.portal-theme .portal-heading-lg {
+  font-size: 1.375rem; /* 22px */
+  line-height: 1.25;
+}
+
+.portal-theme .portal-heading-md {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.35;
+}
+
+/* ── Card system ───────────────────────────────────────────────────────────── */
+
+.portal-theme .portal-card {
+  background: white;
+  border: 1px solid hsl(38 15% 91%);
+  border-radius: 0.5rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  overflow: hidden;
+}
+
+.portal-theme .portal-card:hover {
+  box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/* ── Image container ───────────────────────────────────────────────────────── */
+
+.portal-theme .portal-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-theme .portal-image-container img {
+  transition: transform 0.4s ease;
+}
+
+.portal-theme .portal-image-container:hover img {
+  transform: scale(1.03);
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+
+@keyframes portal-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.portal-theme .portal-animate-in {
+  animation: portal-fade-in 0.35s ease-out forwards;
+}
+
+/* ── Skeleton shimmer ──────────────────────────────────────────────────────── */
+
+@keyframes portal-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.portal-theme .portal-skeleton {
+  background: linear-gradient(90deg, hsl(38 14% 95%) 25%, hsl(38 14% 91%) 50%, hsl(38 14% 95%) 75%);
+  background-size: 200% 100%;
+  animation: portal-shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Gold accent utilities ─────────────────────────────────────────────────── */
+
+.portal-theme .portal-gold {
+  color: hsl(36 56% 51%);
+}
+
+.portal-theme .portal-gold-bg {
+  background-color: hsl(36 56% 51%);
+  color: white;
+}
+
+/* ── Fallback property image ───────────────────────────────────────────────── */
+
+.portal-theme .portal-img-fallback {
+  background: linear-gradient(135deg, hsl(38 14% 93%) 0%, hsl(38 14% 88%) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
