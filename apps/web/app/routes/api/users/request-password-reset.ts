@@ -22,11 +22,11 @@ export async function action({ request }: ActionFunctionArgs) {
     const payload = await request.json();
     const note = payload.note as string | undefined;
 
-    // 1. Look up the child agent's underlying profile to find their `admin_id`
+    // 1. Look up the child agent's underlying profile to find their `company_id`
     const { data: profile, error: profileError } = await (
       supabase.from("profiles") as any
     )
-      .select("full_name, admin_id")
+      .select("full_name, company_id")
       .eq("id", authUser.id)
       .single();
 
@@ -34,7 +34,7 @@ export async function action({ request }: ActionFunctionArgs) {
       throw new Error("Unable to locate profile details.");
     }
 
-    if (!profile.admin_id) {
+    if (!profile.company_id) {
       throw new Error("You are not a managed agent.");
     }
 
@@ -48,7 +48,7 @@ export async function action({ request }: ActionFunctionArgs) {
     );
 
     const { data: adminUser, error: adminError } =
-      await adminAuthClient.auth.admin.getUserById(profile.admin_id);
+      await adminAuthClient.auth.admin.getUserById(profile.company_id);
 
     if (adminError || !adminUser?.user) {
       throw new Error(

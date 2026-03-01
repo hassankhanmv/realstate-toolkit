@@ -76,7 +76,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     throw err;
   });
 
-  const companyId = user.profile?.admin_id || user.id;
+  const companyId = user.profile?.company_id || user.id;
 
   try {
     const properties = await getPropertiesByCompany(supabase, companyId);

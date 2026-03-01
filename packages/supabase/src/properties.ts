@@ -186,7 +186,7 @@ export const deleteProperty = async (
 // Upload property images
 export const uploadPropertyImages = async (
   supabase: SupabaseClient<Database>,
-  brokerId: string,
+  companyId: string,
   propertyId: string,
   files: File[],
 ) => {
@@ -212,7 +212,7 @@ export const uploadPropertyImages = async (
       }
 
       const fileExt = file.name.split(".").pop();
-      const fileName = `${brokerId}/${propertyId}/${Date.now()}-${Math.random()
+      const fileName = `${companyId}/${propertyId}/${Date.now()}-${Math.random()
         .toString(36)
         .substring(7)}.${fileExt}`;
 

@@ -3,8 +3,10 @@ import { data, useRevalidator, type LoaderFunctionArgs } from "react-router";
 import { useLoaderData, useNavigation, Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
+  getLeadsAnalytics,
   getLeadsByCompany,
   getPropertiesByCompany,
+  createLeadEvent,
   type Lead,
 } from "@repo/supabase";
 import Papa from "papaparse";
@@ -94,28 +96,41 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const url = new URL(request.url);
     const propertyId = url.searchParams.get("propertyId");
 
-    const companyId = user.profile?.admin_id || user.id;
+    const resolvedCompanyId = user.profile?.company_id || user.id;
 
-    let leads = [];
-    const allLeads = await getLeadsByCompany(supabase, companyId);
+    // 1. Fetch leads scoped to this company
+    let leads = await getLeadsByCompany(supabase, resolvedCompanyId);
 
     if (propertyId) {
-      leads = allLeads.filter((lead: any) => lead.property_id === propertyId);
-    } else {
-      leads = allLeads;
+      leads = leads.filter((lead: any) => lead.property_id === propertyId);
     }
 
-    const allProperties = await getPropertiesByCompany(supabase, companyId);
+    // 2. Fetch properties list (for assign dropdown) scoped to this company
+    const allProperties = await getPropertiesByCompany(
+      supabase,
+      resolvedCompanyId,
+    );
     const properties = allProperties.map((p: any) => ({
       id: p.id,
       title: p.title,
     }));
 
-    return data({ leads, user, propertyId, properties }, { headers });
+    const analytics = await getLeadsAnalytics(supabase, resolvedCompanyId);
+
+    return data(
+      { leads, properties, user, propertyId, analytics },
+      { headers },
+    );
   } catch (error) {
     console.error("Failed to fetch leads:", error);
     return data(
-      { error: "Failed to fetch leads", leads: [], user: null, properties: [] },
+      {
+        error: "Failed to fetch leads",
+        leads: [],
+        user: null,
+        properties: [],
+        analytics: null,
+      },
       { status: 500, headers },
     );
   }
@@ -130,11 +145,8 @@ export const meta: Route.MetaFunction = () => {
     },
   ];
 };
-
-export default function LeadsPage() {
-  const { leads, error, user, propertyId, properties } = useLoaderData<
-    typeof loader
-  >() as {
+export default function LeadsPage({ loaderData }: Route.ComponentProps) {
+  const { leads, error, user, propertyId, properties } = loaderData as {
     leads: any[];
     error?: string;
     user: any;

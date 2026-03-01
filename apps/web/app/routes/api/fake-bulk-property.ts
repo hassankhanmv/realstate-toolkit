@@ -22,7 +22,15 @@ export const action = async ({ request }: Route.ActionArgs) => {
     const body = (await request.json()) as { count?: number };
     const count = Math.min(body.count || 25, 50); // cap at 50
 
-    const fakeProperties = generateFakeProperties(count, user.id);
+    // Get absolute companyId
+    const { data: profile } = await (supabase.from("profiles") as any)
+      .select("company_id")
+      .eq("id", user.id)
+      .single();
+
+    const companyId = profile?.company_id || user.id;
+
+    const fakeProperties = generateFakeProperties(count, companyId);
     const results: { index: number; title: string; status: string }[] = [];
 
     for (let i = 0; i < fakeProperties.length; i++) {

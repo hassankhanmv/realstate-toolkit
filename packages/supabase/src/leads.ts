@@ -138,15 +138,16 @@ export async function deleteLead(
 }
 
 // Fetch leads not assigned to any property
+// Fetch leads not assigned to any property
 export async function getUnassignedLeads(
   supabase: SupabaseClient<Database>,
-  brokerId: string,
+  companyId: string,
 ) {
   try {
     const { data, error } = await supabase
       .from("leads")
       .select("*")
-      .eq("broker_id", brokerId)
+      .eq("company_id", companyId)
       .is("property_id", null)
       .order("created_at", { ascending: false });
 
@@ -197,7 +198,7 @@ export async function bulkDeleteLeads(
 // Fetch leads with follow-up dates in the next N days
 export async function getUpcomingFollowUps(
   supabase: SupabaseClient<Database>,
-  brokerId: string,
+  companyId: string,
   days: number = 7,
 ) {
   try {
@@ -208,7 +209,7 @@ export async function getUpcomingFollowUps(
     const { data, error } = await supabase
       .from("leads")
       .select("*, properties ( title )")
-      .eq("broker_id", brokerId)
+      .eq("company_id", companyId)
       .not("follow_up_date", "is", null)
       .gte("follow_up_date", now.toISOString().split("T")[0])
       .lte("follow_up_date", future.toISOString().split("T")[0])
@@ -225,13 +226,13 @@ export async function getUpcomingFollowUps(
 // Aggregate analytics: counts by source, status, conversion rate, top properties
 export async function getLeadsAnalytics(
   supabase: SupabaseClient<Database>,
-  brokerId: string,
+  companyId: string,
 ) {
   try {
     const { data: leads, error } = await supabase
       .from("leads")
       .select("status, source, property_id, properties ( title )")
-      .eq("broker_id", brokerId);
+      .eq("company_id", companyId);
 
     if (error) throw error;
     if (!leads || leads.length === 0) {
