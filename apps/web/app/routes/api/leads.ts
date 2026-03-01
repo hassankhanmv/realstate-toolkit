@@ -24,11 +24,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   const { data: profile } = await (supabase.from("profiles") as any)
-    .select("admin_id")
+    .select("company_id")
     .eq("id", user.id)
     .single();
 
-  const companyId = profile?.admin_id || user.id;
+  const companyId = profile?.company_id || user.id;
 
   try {
     const leads = await getLeadsByCompany(supabase, companyId);
@@ -62,17 +62,17 @@ export async function action({ request }: ActionFunctionArgs) {
       if (body.property_id === "") {
         body.property_id = null as any;
       }
-      // Set broker_id to current user
-      body.broker_id = user.id;
+      // We no longer have broker_id on leads, but we want to store the acting user
+      // so in the events we use user_id, and for the lead itself we only need company_id.
 
       let companyId = user.id;
       const { data: profile } = await (supabase.from("profiles") as any)
-        .select("admin_id")
+        .select("company_id")
         .eq("id", user.id)
         .single();
 
       if (profile) {
-        companyId = profile.admin_id || user.id;
+        companyId = profile.company_id || user.id;
       }
 
       body.company_id = companyId;
@@ -84,7 +84,7 @@ export async function action({ request }: ActionFunctionArgs) {
         await createLeadEvent(supabase, {
           lead_id: newLead.id,
           event_type: "created",
-          broker_id: user.id,
+          user_id: user.id,
         });
       }
 
@@ -117,7 +117,7 @@ export async function action({ request }: ActionFunctionArgs) {
               lead_id: lead.id,
               event_type: "status_changed",
               new_value: body.data.status,
-              broker_id: user.id,
+              user_id: user.id,
             });
           }
         }

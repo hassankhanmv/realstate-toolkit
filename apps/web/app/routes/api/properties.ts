@@ -16,13 +16,13 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     return data({ error: "Unauthorized" }, { status: 401, headers });
   }
 
-  // Get user profile to determine their root company_id (admin_id or their own id)
+  // Get user profile to determine their root company_id (company_id or their own id)
   const { data: profile } = await (supabase.from("profiles") as any)
-    .select("admin_id")
+    .select("company_id")
     .eq("id", user.id)
     .single();
 
-  const companyId = profile?.admin_id || user.id;
+  const companyId = profile?.company_id || user.id;
 
   try {
     const properties = await getPropertiesByCompany(supabase, companyId);
@@ -65,18 +65,17 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
     const newPropertyData: PropertyInsert = {
       ...jsonData,
-      broker_id: user.id, // Enforce broker_id from auth
     } as PropertyInsert;
 
     // Ensure profile exists to avoid FK error, and resolve company_id
     let finalCompanyId = user.id;
     const { data: profile } = await (supabase.from("profiles") as any)
-      .select("id, admin_id")
+      .select("id, company_id")
       .eq("id", user.id)
       .single();
 
     if (profile) {
-      finalCompanyId = profile.admin_id || user.id;
+      finalCompanyId = profile.company_id || user.id;
     }
 
     newPropertyData.company_id = finalCompanyId;

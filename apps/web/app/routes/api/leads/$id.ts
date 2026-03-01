@@ -59,7 +59,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
             event_type: "status_changed",
             old_value: oldLead.status,
             new_value: body.status,
-            broker_id: user.id,
+            user_id: user.id,
           });
 
           // Rule 2: Automatic Email on Status Change
@@ -85,7 +85,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
             event_type: "note_added", // Or note_changed
             old_value: oldLead.notes,
             new_value: body.notes,
-            broker_id: user.id,
+            user_id: user.id,
           });
         }
         if ("property_id" in body && body.property_id !== oldLead.property_id) {
@@ -94,7 +94,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
             event_type: "property_assigned",
             old_value: oldLead.property_id || "Unassigned",
             new_value: body.property_id || "Unassigned",
-            broker_id: user.id,
+            user_id: user.id,
           });
         }
       }

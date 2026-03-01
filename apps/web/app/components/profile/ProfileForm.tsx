@@ -60,7 +60,9 @@ export function ProfileForm() {
   const [isRequestingReset, setIsRequestingReset] = useState(false);
 
   // Check if current user is a managed child agent
-  const isManagedAgent = user?.profile?.admin_id != null;
+  // Previously we used admin_id != null. Now company_id defines the tenant.
+  // If their company_id is not their own user id, they are managed by someone else.
+  const isManagedAgent = user?.profile?.company_id !== user?.id;
 
   const [passwordForm, setPasswordForm] = useState({
     password: "",

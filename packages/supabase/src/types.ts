@@ -6,7 +6,7 @@ export type Database = {
           id: string;
           full_name: string | null;
           company_name: string | null;
-          admin_id: string | null;
+          company_id: string | null;
           avatar_url: string | null;
           created_at: string;
           role: string | null;
@@ -19,7 +19,7 @@ export type Database = {
           id: string;
           full_name?: string | null;
           company_name?: string | null;
-          admin_id?: string | null;
+          company_id?: string | null;
           avatar_url?: string | null;
           created_at?: string;
           role?: string | null;
@@ -32,7 +32,7 @@ export type Database = {
           id?: string;
           full_name?: string | null;
           company_name?: string | null;
-          admin_id?: string | null;
+          company_id?: string | null;
           avatar_url?: string | null;
           created_at?: string;
           role?: string | null;
@@ -45,8 +45,7 @@ export type Database = {
       properties: {
         Row: {
           id: string;
-          broker_id: string;
-          company_id: string | null;
+          company_id: string;
           title: string;
           price: number;
           description: string | null;
@@ -78,8 +77,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          broker_id: string;
-          company_id?: string | null;
+          company_id?: string;
           title: string;
           price: number;
           description?: string | null;
@@ -111,8 +109,7 @@ export type Database = {
         };
         Update: {
           id?: string;
-          broker_id?: string;
-          company_id?: string | null;
+          company_id?: string;
           title?: string;
           price?: number;
           description?: string | null;
@@ -146,8 +143,7 @@ export type Database = {
       leads: {
         Row: {
           id: string;
-          broker_id: string;
-          company_id: string | null;
+          company_id: string;
           property_id: string | null;
           name: string;
           phone: string | null;
@@ -161,8 +157,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          broker_id: string;
-          company_id?: string | null;
+          company_id?: string;
           property_id?: string | null;
           name: string;
           phone?: string | null;
@@ -176,8 +171,7 @@ export type Database = {
         };
         Update: {
           id?: string;
-          broker_id?: string;
-          company_id?: string | null;
+          company_id?: string;
           property_id?: string | null;
           name?: string;
           phone?: string | null;
@@ -197,7 +191,7 @@ export type Database = {
           event_type: string;
           old_value: string | null;
           new_value: string | null;
-          broker_id: string | null;
+          user_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -206,7 +200,7 @@ export type Database = {
           event_type: string;
           old_value?: string | null;
           new_value?: string | null;
-          broker_id?: string | null;
+          user_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -215,7 +209,7 @@ export type Database = {
           event_type?: string;
           old_value?: string | null;
           new_value?: string | null;
-          broker_id?: string | null;
+          user_id?: string | null;
           created_at?: string;
         };
       };

@@ -21,11 +21,11 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
   }
 
   const { data: profile } = await (supabase.from("profiles") as any)
-    .select("admin_id")
+    .select("company_id")
     .eq("id", user.id)
     .single();
 
-  const companyId = profile?.admin_id || user.id;
+  const companyId = profile?.company_id || user.id;
 
   const { id } = params;
   if (!id) {
@@ -36,8 +36,8 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     const property = await getPropertyById(supabase, id);
 
     // Check ownership
-    const propCompanyId = property.company_id || property.broker_id;
-    if (propCompanyId !== companyId && property.broker_id !== user.id) {
+    const propCompanyId = property.company_id;
+    if (propCompanyId !== companyId) {
       return data({ error: "Forbidden" }, { status: 403, headers });
     }
 
@@ -62,11 +62,11 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   }
 
   const { data: profile } = await (supabase.from("profiles") as any)
-    .select("admin_id")
+    .select("company_id")
     .eq("id", user.id)
     .single();
 
-  const companyId = profile?.admin_id || user.id;
+  const companyId = profile?.company_id || user.id;
 
   const { id } = params;
   if (!id) {
@@ -77,8 +77,8 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   let existing: any;
   try {
     existing = await getPropertyById(supabase, id);
-    const propCompanyId = existing.company_id || existing.broker_id;
-    if (propCompanyId !== companyId && existing.broker_id !== user.id) {
+    const propCompanyId = existing.company_id;
+    if (propCompanyId !== companyId) {
       return data({ error: "Forbidden" }, { status: 403, headers });
     }
   } catch (e) {
@@ -94,9 +94,8 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
 
     if (request.method === "PUT") {
       const updateData = (await request.json()) as PropertyUpdate;
-      // Prevent updating broker_id or id
+      // Prevent updating id
       delete updateData.id;
-      delete updateData.broker_id;
 
       const updated = await updateProperty(
         adminSupabase as any,

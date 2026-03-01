@@ -27,14 +27,14 @@ const LOCATIONS = [
   "DIFC",
 ];
 
-export function generateFakeProperties(count: number, userId: string) {
+export function generateFakeProperties(count: number, companyId: string) {
   return Array.from({ length: count }).map(() => {
     const type = faker.helpers.arrayElement(PROPERTY_TYPES);
     const isCommercial =
       type === "Office" || type === "Commercial" || type === "Plot";
 
     return {
-      broker_id: userId,
+      company_id: companyId,
       title: `${faker.word.adjective({ strategy: "any-length" })} ${type} in ${faker.helpers.arrayElement(LOCATIONS)}`,
       price: faker.number.int({ min: 500000, max: 15000000 }),
       location: faker.helpers.arrayElement(LOCATIONS),

@@ -20,13 +20,13 @@ const PROPERTY_IDS = [
   "94481659-25a8-4167-b43e-28f2c5637c53",
 ];
 
-export function generateFakeLeads(count: number, brokerId: string) {
+export function generateFakeLeads(count: number, companyId: string) {
   return Array.from({ length: count }).map(() => {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
 
     return {
-      broker_id: brokerId,
+      company_id: companyId,
       name: `${firstName} ${lastName}`,
       email: faker.internet.email({ firstName, lastName }).toLowerCase(),
       phone: `+9715${faker.string.numeric(8)}`,

@@ -87,17 +87,11 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     // Initialize an admin client to bypass RLS and prevent the current admin session from logging out
-    const { createClient } = await import("@supabase/supabase-js");
-    const adminAuthClient = createClient(
+    const { createAdminClient } = await import("@repo/supabase");
+    const adminAuthClient = createAdminClient(
       process.env.VITE_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
         process.env.VITE_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      },
     );
 
     // 1. Create auth user securely
@@ -120,7 +114,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const updatePayload: Database["public"]["Tables"]["profiles"]["Update"] = {
       role: validatedData.role,
       company_name: resolvedCompanyName, // Permanent tenant isolation linkage
-      admin_id: authUser.id, // Direct company owner hierarchy
+      company_id: authUser.id, // Direct company owner hierarchy
       is_disabled: validatedData.is_disabled,
       expiry_date: validatedData.expiry_date
         ? new Date(validatedData.expiry_date).toISOString()
